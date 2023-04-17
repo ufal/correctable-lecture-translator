@@ -9,7 +9,7 @@ class AsrClient {
 	session: string;
 	sessionId: string;
 	constructor({
-		baseUrl = "http://slt.ufal.mff.cuni.cz:5003",
+		baseUrl = "https://slt.ufal.mff.cuni.cz:5003",
 		additionalHeaders,
 		sessionId = "default",
 	}: {

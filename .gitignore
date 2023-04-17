@@ -21,3 +21,5 @@
 **/*.njsproj
 **/*.sln
 **/*.sw?
+
+**/recordings

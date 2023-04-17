@@ -355,11 +355,11 @@ def submit_audio_chunk():
         - message (`str`): A message describing what went wrong if the request was not successful.
 
     Example:
-        >>> requests.post("http://slt.ufal.mff.cuni.cz:5003/submit_audio_chunk?session_id=default", json={"timestamp": 0, "chunk": {"0": 1, "1": 2}})
+        >>> requests.post("https://slt.ufal.mff.cuni.cz:5003/submit_audio_chunk?session_id=default", json={"timestamp": 0, "chunk": {"0": 1, "1": 2}})
         {"success": true, "session_id": "default"}
-        >>> requests.post("http://slt.ufal.mff.cuni.cz:5003/submit_audio_chunk?session_id=default", json={"timestamp": 0, "chunk": {"0": 1.0, "1": 0.5}})
+        >>> requests.post("https://slt.ufal.mff.cuni.cz:5003/submit_audio_chunk?session_id=default", json={"timestamp": 0, "chunk": {"0": 1.0, "1": 0.5}})
         {"success": true, "session_id": "default"}
-        >>> requests.post("http://slt.ufal.mff.cuni.cz:5003/submit_audio_chunk?session_id=UNKNOWN_SESSION", json={"timestamp": 0, "chunk": {"0": 1, "1": 2}})
+        >>> requests.post("https://slt.ufal.mff.cuni.cz:5003/submit_audio_chunk?session_id=UNKNOWN_SESSION", json={"timestamp": 0, "chunk": {"0": 1, "1": 2}})
         {"success": false, "session_id": "UNKNOWN_SESSION", "message": "Session not found"}
     """
 
@@ -426,9 +426,9 @@ def get_latest_text_chunks():
         - message (`str`): A message describing what went wrong if the request was not successful.
 
     Example:
-        >>> requests.post("http://slt.ufal.mff.cuni.cz:5003/get_latest_text_chunks?session_id=default", json={"versions": {"0": 0, "1": 0}})
+        >>> requests.post("https://slt.ufal.mff.cuni.cz:5003/get_latest_text_chunks?session_id=default", json={"versions": {"0": 0, "1": 0}})
         {"success": true, "session_id": "default", "text_chunks": [{"timestamp": 0, "version": 1, "text": "Hello world!"}, {"timestamp": 2, "version": 0, "text": "This is a new text!"}], "versions": {"0": 1, "1": 0, "2": 0}}
-        >>> requests.post("http://slt.ufal.mff.cuni.cz:5003/get_latest_text_chunks?session_id=UNKNOWN_SESSION", json={"versions": {"0": 0, "1": 0}})
+        >>> requests.post("https://slt.ufal.mff.cuni.cz:5003/get_latest_text_chunks?session_id=UNKNOWN_SESSION", json={"versions": {"0": 0, "1": 0}})
         {"success": false, "session_id": "UNKNOWN_SESSION", "message": "Session not found"}
     """
 
@@ -477,7 +477,7 @@ def get_latest_text_chunk_versions():
         - message (`str`): A message describing what went wrong if the request was not successful.
 
     Example:
-        >>> requests.get("http://slt.ufal.mff.cuni.cz:5003/get_latest_text_chunk_versions?session_id=default")
+        >>> requests.get("https://slt.ufal.mff.cuni.cz:5003/get_latest_text_chunk_versions?session_id=default")
         {"success": true, "session_id": "default", "versions": {"0": 1, "1": 1, "2": 0}}
     """
 
@@ -527,7 +527,7 @@ def edit_asr_chunk():
         - message (`str`): A message describing what went wrong if the request was not successful.
 
     Example:
-        >>> requests.post("http://slt.ufal.mff.cuni.cz:5003/edit_asr_chunk?session_id=default", json={"timestamp": 0, "version": 1, "text": "Hello there, my name is John Wick."})
+        >>> requests.post("https://slt.ufal.mff.cuni.cz:5003/edit_asr_chunk?session_id=default", json={"timestamp": 0, "version": 1, "text": "Hello there, my name is John Wick."})
         {"success": true, "session_id": "default", "text": "Hello<span class='edited'> there</span>, my name is John<span class='edited'> Wick</span>.", "timestamp": 0, "version": 2}
     """
     global sessions
@@ -578,7 +578,7 @@ def switch_source_language():
         - message (`str`): A message describing what went wrong if the request was not successful.
 
     Example:
-        >>> requests.post("http://slt.ufal.mff.cuni.cz:5003/switch_source_language?session_id=default", json={"language": "English"})
+        >>> requests.post("https://slt.ufal.mff.cuni.cz:5003/switch_source_language?session_id=default", json={"language": "English"})
         {"success": true, "session_id": "default"}
     """
     global sessions
@@ -624,7 +624,7 @@ def switch_transcript_language():
         - message (`str`): A message describing what went wrong if the request was not successful.
 
     Example:
-        >>> requests.post("http://slt.ufal.mff.cuni.cz:5003/switch_transcript_language?session_id=default", json={"language": "English"})
+        >>> requests.post("https://slt.ufal.mff.cuni.cz:5003/switch_transcript_language?session_id=default", json={"language": "English"})
         {"success": true, "session_id": "default"}
     """
 
@@ -668,9 +668,9 @@ def offload_computation():
     - audio_chunk (`list`): The audio chunk to be processed.
 
     Example:
-        >>> requests.post("http://slt.ufal.mff.cuni.cz:5003/offload_ASR", json={"session_id": "default", "timestamp": 0, "ASR_result": {"text": "Hello world"}})
+        >>> requests.post("https://slt.ufal.mff.cuni.cz:5003/offload_ASR", json={"session_id": "default", "timestamp": 0, "ASR_result": {"text": "Hello world"}})
         {"success": true}
-        >>> requests.get("http://slt.ufal.mff.cuni.cz:5003/offload_ASR")
+        >>> requests.get("https://slt.ufal.mff.cuni.cz:5003/offload_ASR")
         {"session_id": "default", "timestamp": 0, "audio_chunk": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, ...]}
     """
 
@@ -715,7 +715,7 @@ def get_active_sessions():
     - active_sessions (`list`): A list of active sessions.
 
     Example:
-        >>> requests.get("http://slt.ufal.mff.cuni.cz:5003/get_active_sessions")
+        >>> requests.get("https://slt.ufal.mff.cuni.cz:5003/get_active_sessions")
         {"active_sessions": ["default"]}
     """
 
@@ -743,11 +743,11 @@ def create_session():
         - message (`str`): A message describing what happened.
 
     Example:
-        >>> requests.get("http://slt.ufal.mff.cuni.cz:5003/create_session?session_id=default")
+        >>> requests.get("https://slt.ufal.mff.cuni.cz:5003/create_session?session_id=default")
         {"success": true, "message": "Successfully created session default"}
-        >>> requests.get("http://slt.ufal.mff.cuni.cz:5003/create_session?session_id=session_already_exists")
+        >>> requests.get("https://slt.ufal.mff.cuni.cz:5003/create_session?session_id=session_already_exists")
         {"success": false, "message": "Session already exists"}
-        >>> requests.get("http://slt.ufal.mff.cuni.cz:5003/create_session")
+        >>> requests.get("https://slt.ufal.mff.cuni.cz:5003/create_session")
         {"success": false, "message": "Session ID not provided"}
     """
 
@@ -799,9 +799,9 @@ def end_session():
         - session_id (`str`): The session ID of the session.
 
     Example:
-        >>> requests.get("http://slt.ufal.mff.cuni.cz:5003/end_session?session_id=default")
+        >>> requests.get("https://slt.ufal.mff.cuni.cz:5003/end_session?session_id=default")
         {"success": true, "message": "Successfully ended session default"}
-        >>> requests.get("http://slt.ufal.mff.cuni.cz:5003/end_session?session_id=session_not_found")
+        >>> requests.get("https://slt.ufal.mff.cuni.cz:5003/end_session?session_id=session_not_found")
         {"success": false, "message": "Session not found", "session_id": "session_not_found"}
     """
     global sessions
