@@ -1,0 +1,27 @@
+$nord-white: #eceff4;
+
+.container {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	align-content: center;
+}
+
+.text {
+	width: 30vw;
+	word-break: break-all;
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+.test {
+	.v-field {
+		background-color: $nord-white;
+	}
+}
+
+.v-btn.testbtn {
+	background-color: $nord-white;
+}
+

@@ -1,0 +1,16 @@
+.list {
+    overflow-y: scroll;
+    max-height: 350px;
+    margin: 10px;
+    width: max-content;
+}
+
+.item {
+    margin: 10px;
+    width: 300px;
+    line-height: 30px;
+}
+
+.end {
+    margin-left: 35px;
+}

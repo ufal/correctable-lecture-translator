@@ -1,0 +1,30 @@
+.container {
+	// width: 50%;
+	margin: 20px;
+}
+
+.editTextChunk {
+	font-family: Arial, Helvetica, sans-serif;
+	color: #262626;
+	font-size: 15px;
+	line-height: 1.2;
+	height: auto;
+	padding: 15px;
+	margin: 5px;
+	// border-bottom: 1px solid #ccc;
+	border-radius: 4px;
+	&:focus {
+		// outline: 1px dashed red;;
+		outline: none;
+		box-shadow: 0 0 5px 1px #ccc;
+	}
+}
+
+.submitChanges {
+	margin: 10px;
+	color: white !important;
+}
+
+.discardChanges {
+	color: white !important;
+}
