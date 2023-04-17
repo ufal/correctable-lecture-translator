@@ -11,13 +11,14 @@ import fs from 'fs';
 let serverKey: Buffer;
 let serverCert: Buffer;
 let serverConfig;
+let port = 5001;
 
 try {
   serverKey = fs.readFileSync(process.env.SERVERKEY!);
   serverCert = fs.readFileSync(process.env.SERVERCERT!);
 
   serverConfig = {
-    port: 5001,
+    port: port,
     https: {
       key: serverKey,
       cert: serverCert
@@ -29,7 +30,7 @@ catch (e) {
   console.info("Running http server without SSL.")
 
   serverConfig = {
-    port: 5001,
+    port: port,
   }
 }
 
