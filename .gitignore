@@ -22,5 +22,5 @@
 **/*.sln
 **/*.sw?
 
-**/recordings
+**/recordings/*
 **/.nohup.out
