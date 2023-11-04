@@ -1,308 +1,16 @@
-import difflib
 import json
 import os
-import re
 import time
 from typing import Dict, List, TextIO, Tuple, Union
 
 from flask import Flask, Response, make_response, request
 from flask_cors import CORS
 
-
-class ASRConfig:
-    def __init__(self):
-        self.SAMPLING_RATE = 16000  # Hz
-        self.AUDIO_SNIPPET_SECONDS = 30  # seconds
-        self.AUDIO_SNIPPET_SIZE = self.SAMPLING_RATE * self.AUDIO_SNIPPET_SECONDS  # samples
-        self.SHIFT_SECONDS = 28  # seconds
-        self.SHIFT_SIZE = (
-            self.SHIFT_SECONDS * self.SAMPLING_RATE
-        )  # seconds * samples/second = samples
-
-
-class Session:
-    def __init__(self, session_id: str) -> None:
-        global CONFIG
-
-        self.session_id: str = session_id
-        self.source_language: str = "Czech"  # default audio language
-        self.transcript_language: str = "English"  # default transcript language
-        self.buffer: AudioBuffer = AudioBuffer(
-            SNIPPET_SIZE=CONFIG.AUDIO_SNIPPET_SIZE,
-            SHIFT_LENGTH=CONFIG.SHIFT_SIZE,
-        )
-        self.last_chunk_time: float = time.time()
-        self.save_path: str = self.get_save_folder()
-        self.text: CurrentASRText = CurrentASRText(self.save_path + "/text_chunks")
-        self.last_sent_timestamp: int = -1
-        self.unprocessed_timestamps: list[int] = [0]
-        self.sent_out_for_processing: Dict[int, float] = dict()
-        self.processed_timestamps: set[int] = {-1}
-
-    def switch_transcript_language(self, language: str):
-        self.transcript_language = language
-
-    def switch_source_language(self, language: str):
-        self.source_language = language
-
-    def end_session(self):
-        def format_timestamp(
-            seconds: float,
-            always_include_hours: bool = False,
-            decimal_marker: str = ".",
-        ):
-            assert seconds >= 0, "non-negative timestamp expected"
-            milliseconds = round(seconds * 1000.0)
-
-            hours = milliseconds // 3_600_000
-            milliseconds -= hours * 3_600_000
-
-            minutes = milliseconds // 60_000
-            milliseconds -= minutes * 60_000
-
-            seconds = milliseconds // 1_000
-            milliseconds -= seconds * 1_000
-
-            hours_marker = f"{hours:02d}:" if always_include_hours or hours > 0 else ""
-            return f"{hours_marker}{minutes:02d}:{seconds:02d}{decimal_marker}{milliseconds:03d}"
-
-        def break_line(line: str, length: int):
-            break_index = min(len(line) // 2, length)  # split evenly or at maximum length
-
-            # work backwards from that guess to split between words
-            # if break_index <= 1, we've hit the beginning of the string and can't split
-            while break_index > 1:
-                if line[break_index - 1] == " ":
-                    break  # break at space
-                else:
-                    break_index -= 1
-            if break_index > 1:
-                # split the line, not including the space at break_index
-                return line[: break_index - 1] + "\n" + line[break_index:]
-            else:
-                return line
-
-        def process_segment(segment: dict, line_length: int = 0):
-            segment["text"] = re.sub(r"\s+", " ", segment["text"])
-            segment["text"] = segment["text"].strip()
-
-            if line_length > 0 and len(segment["text"]) > line_length:
-                # break at N characters as per Netflix guidelines
-                segment["text"] = break_line(segment["text"], line_length)
-
-            return segment
-
-        def write_srt(transcript: List[dict], file: TextIO, line_length: int = 0):
-            for i, segment in enumerate(transcript, start=1):
-                segment = process_segment(segment, line_length=line_length)
-
-                print(
-                    f"{i}\n"
-                    f"{format_timestamp(segment['start'], always_include_hours=True, decimal_marker=',')} --> "  # noqa: E501
-                    f"{format_timestamp(segment['end'], always_include_hours=True, decimal_marker=',')}\n"  # noqa: E501
-                    f"{segment['text'].strip().replace('-->', '->')}\n",
-                    file=file,
-                    flush=True,
-                )
-
-        latest_text_chunks = self.text.get_latest_text_chunks(versions={})
-        transcript = []
-        # for chunk in latest_text_chunks:
-        #     transcript.append(
-        #         {
-        #             "start": 30.0 * chunk["timestamp"],
-        #             "end": 30.0 * (chunk["timestamp"] + 1),
-        #             "text": chunk["text"],
-        #         }
-        #     )
-
-        transcript = [
-            {
-                "start": 30.0 * chunk["timestamp"],
-                "end": 30.0 * (chunk["timestamp"] + 1),
-                "text": chunk["text"],
-            }
-            for chunk in latest_text_chunks
-        ]
-
-        with open(self.save_path + "/transcript.srt", "w", encoding="utf-8") as file:
-            write_srt(transcript, file, line_length=0)
-
-        with open(self.save_path + "/all_text_chunks.json", "w", encoding="utf-8") as file:
-            json.dump(self.text.text_chunks, file, indent=4)
-
-        with open(
-            self.save_path + "/all_text_chunks_no_spans.json",
-            "w",
-            encoding="utf-8",
-        ) as file:
-            json.dump(self.text.text_chunks_no_spans, file, indent=4)
-
-        # throw away everything from processing queue that belongs to this session
-        global processing_queue
-        processing_queue = [x for x in processing_queue if x["session_id"] != self.session_id]
-
-    def get_save_folder(self):
-        recordings = os.listdir("recordings")
-        # filter out files that are not directories
-        recordings = [x for x in recordings if os.path.isdir("recordings/" + x)]
-        if self.session_id not in recordings:
-            os.mkdir("recordings/" + self.session_id)
-
-        # list recordings/self.session_id
-        recordings = os.listdir("recordings/" + self.session_id)
-        # filter out files that are not directories
-        recordings = [
-            x for x in recordings if os.path.isdir("recordings/" + self.session_id + "/" + x)
-        ]
-        recordings_index = 0
-        while str(recordings_index) in recordings:
-            recordings_index += 1
-
-        os.mkdir("recordings/" + self.session_id + "/" + str(recordings_index))
-        recordings_folder = "recordings/" + self.session_id + "/" + str(recordings_index)
-        os.mkdir(recordings_folder + "/audio")
-        os.mkdir(recordings_folder + "/text_chunks")
-        return recordings_folder
-
-    def save_audio_chunk(self, chunk, timestamp: int):
-        with open(
-            self.save_path + "/audio/" + str(timestamp) + "_" + str(time.time()) + ".json",
-            mode="w",
-        ) as f:
-            print(json.dumps(chunk), file=f)
-
-
-class CurrentASRText:
-    def __init__(self, save_path: str):
-        self.text_chunks: dict[int, dict[int, str]] = dict()
-        self.text_chunks_no_spans: dict[int, dict[int, str]] = dict()
-        self.save_path = save_path
-
-    def append(self, text: str, timestamp: int):
-        self.text_chunks[timestamp] = {0: text}
-        self.text_chunks_no_spans[timestamp] = {0: text}
-        with open(self.save_path + "/" + str(timestamp) + "_0" + ".txt", "w") as f:
-            print(text, file=f)
-
-    def clear(self):
-        self.text_chunks = dict()
-        self.text_chunks_no_spans = dict()
-
-    def get_latest_versions(self):
-        return {
-            timestamp: max(self.text_chunks[timestamp].keys())
-            for timestamp in self.text_chunks.keys()
-        }
-
-    def get_latest_text_chunks(self, versions: Dict[int, int]):
-        ret_value: List[Dict[str, Union[int, str]]] = []
-        for timestamp in self.text_chunks.keys():
-            newest_version = max(self.text_chunks[timestamp].keys())
-            if timestamp in versions:
-                if versions[timestamp] < newest_version:
-                    ret_value.append(
-                        {
-                            "timestamp": timestamp,
-                            "version": newest_version,
-                            "text": self.text_chunks[timestamp][newest_version],
-                        }
-                    )
-            else:
-                ret_value.append(
-                    {
-                        "timestamp": timestamp,
-                        "version": newest_version,
-                        "text": self.text_chunks[timestamp][newest_version],
-                    }
-                )
-        return ret_value
-
-    def edit_text_chunk(self, timestamp: int, version: int, text: str) -> Tuple[str, int]:
-        if (
-            text
-            == self.text_chunks_no_spans[timestamp][
-                max(self.text_chunks_no_spans[timestamp].keys())
-            ]
-        ):
-            # if the text is the same as the newest version, discard the edit
-            return self.text_chunks_no_spans[timestamp][
-                max(self.text_chunks_no_spans[timestamp].keys())
-            ], max(self.text_chunks_no_spans[timestamp].keys())
-        if version < max(self.text_chunks_no_spans[timestamp].keys()):
-            # if the version of sender is older than the newest version, discard the edit
-            return self.text_chunks_no_spans[timestamp][
-                max(self.text_chunks_no_spans[timestamp].keys())
-            ], max(self.text_chunks_no_spans[timestamp].keys())
-
-        diff = difflib.ndiff(
-            self.text_chunks_no_spans[timestamp][max(self.text_chunks_no_spans[timestamp].keys())],
-            text,
-        )
-        new_text = []
-        in_edited = False
-        for i, line in enumerate(diff):
-            if line[0] == " ":
-                if in_edited:
-                    # new_text.append("</span>")
-                    new_text.append("</highlighted>")
-                    in_edited = False
-                new_text.append(line[2:])
-            if line[0] == "-":
-                continue
-            if line[0] == "+":
-                if not in_edited:
-                    # new_text.append("<span class='edited'>")
-                    new_text.append("<highlighted>")
-                    in_edited = True
-                new_text.append(line[2:])
-
-        version_num = max(self.text_chunks[timestamp].keys()) + 1
-        with open(
-            self.save_path + "/" + str(timestamp) + "_" + str(version_num) + ".txt",
-            "w",
-        ) as f:
-            print(text, file=f)
-        self.text_chunks[timestamp][version_num] = "".join(new_text)
-        self.text_chunks_no_spans[timestamp][version_num] = text
-        return self.text_chunks[timestamp][version_num], version_num
-
-
-class AudioBuffer:
-    def __init__(self, SNIPPET_SIZE: int, SHIFT_LENGTH: int):
-        # config
-        self.SNIPPET_SIZE = SNIPPET_SIZE
-        self.SHIFT_LENGTH = SHIFT_LENGTH
-
-        # data
-        self.buffer: list[bytes] = []
-        self.smallest_available_timestamp = 0
-
-    def extend(self, chunk):
-        self.buffer.extend(chunk)
-
-    def get_snippet(self, timestamp: int):
-        actuall_timestamp = timestamp - self.smallest_available_timestamp
-        return self.buffer[
-            actuall_timestamp * self.SHIFT_LENGTH : actuall_timestamp * self.SHIFT_LENGTH
-            + self.SNIPPET_SIZE
-        ]
-
-    def can_get_snippet(self, timestamp: int):
-        actuall_timestamp = timestamp - self.smallest_available_timestamp
-        return actuall_timestamp * self.SHIFT_LENGTH + self.SNIPPET_SIZE <= len(self.buffer)
-
-    def shift(self):
-        if len(self.buffer) > self.SNIPPET_SIZE:
-            self.smallest_available_timestamp += 1
-            self.buffer = self.buffer[self.SHIFT_LENGTH :]
-
-    def clear(self):
-        self.buffer = []
-        self.smallest_available_timestamp = 0
-
-    def __len__(self):
-        return len(self.buffer)
+# modules for ASR manipulation
+# from common import format_timestamp, break_line
+# from text_handlers import CurrentASRText
+# from audio_handler import AudioBuffer
+from networking_common import *
 
 
 app = Flask(__name__)
@@ -315,7 +23,7 @@ processing_queue: List[Dict[str, Union[str, int, List]]] = []
 
 def make_dummy_data():
     global sessions
-    session = Session("default")
+    session = Session("default", CONFIG)
 
     session.text.append("Hello, my name is John.", 0)
     session.text.append("I am a student at the University of Applied Sciences in Munich.", 1)
@@ -900,6 +608,11 @@ def end_session():
 
     sessions[session_id].end_session()
     del sessions[session_id]
+
+    # throw away everything from processing queue that belongs to this session
+    global processing_queue
+    processing_queue = [x for x in processing_queue if x["session_id"] != session_id]
+
     response_data = {
         "success": True,
         "message": f"Successfully ended session {session_id}",
