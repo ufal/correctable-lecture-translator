@@ -24,3 +24,5 @@
 
 **/recordings/*
 **/.nohup.out
+
+*.pem

@@ -1,30 +1,11 @@
-# speechtrans-ui
+# Vue 3 + Vite
 
-UI for our live lecture translator and transcript generator
+This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
 
-## essentials
+## Recommended IDE Setup
 
-### Compiles and hot-reloads for development
+- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
 
-```sh
-# yarn
-yarn dev
-```
+## Run
 
-### Compiles and minifies for production
-
-```sh
-# yarn
-yarn build
-```
-
-### Lints and fixes files
-
-```sh
-# yarn
-yarn lint
-```
-
-### Customize configuration
-
-See [Configuration Reference](https://vitejs.dev/config/).
+`sudo docker build -t crt-fe . && sudo docker run -p 5001:3000 --rm crt-fe`
