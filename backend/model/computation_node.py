@@ -39,7 +39,7 @@ while True:
         source_language = json_data["source_language"]
         transcript_language = json_data["transcript_language"]
 
-        if type(audio[0]) == int:
+        if isinstance(audio[0], int):
             audio = np.array(audio, dtype=np.float32) / 32768.0
         audio = np.array(audio, dtype=np.float32)
         result = None
