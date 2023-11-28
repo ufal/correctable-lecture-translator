@@ -444,7 +444,7 @@ if __name__ == "__main__":
 
     while True:
         try:
-            r = requests.get("https://slt.ufal.mff.cuni.cz:5003/offload_ASR", verify=False)
+            r = requests.get("http://slt.ufal.mff.cuni.cz:5003/offload_ASR", verify=False)
             json_data = json.loads(r.text)
             timestamp = json_data["timestamp"]
             audio = json_data["audio"]
@@ -454,8 +454,6 @@ if __name__ == "__main__":
                 time.sleep(5)
                 continue
 
-            print("timestamp:", timestamp)
-            print("session_id", json_data["session_id"])
             session_id = json_data["session_id"]
             source_language = json_data["source_language"]
             transcript_language = json_data["transcript_language"]
@@ -466,34 +464,36 @@ if __name__ == "__main__":
 
             starting_ASR_time = time.time()
             if source_language == transcript_language:
-                config.transcribe_options["language"] = source_language
+                config.language = source_language
                 end = 0
-                while True:
-                    a = audio
-                    online1.insert_audio_chunk(a)
 
-                    try:
-                        o1 = online1.process_iter()
-                    except AssertionError:
-                        print("assertion error", file=sys.stderr)
-                        pass
-                    else:
-                        # output_transcript("Pheonix: ", o1)
-                        if o1[0] is not None:
-                            result = o1[2]
+                online1.insert_audio_chunk(audio)
 
-                            r = requests.post(
-                                "https://slt.ufal.mff.cuni.cz:5003/offload_ASR",
-                                json={
-                                    "session_id": session_id,
-                                    "timestamp": timestamp,
-                                    "ASR_result": result,
-                                },
-                                verify=False,
-                            )
+                try:
+                    o1 = online1.process_iter()
+                except AssertionError:
+                    print("assertion error", file=sys.stderr)
+                    pass
+                else:
+                    # output_transcript("Pheonix: ", o1)
+                    if o1[0] is not None:
+                        result = o1[2]
+                        print(result)
 
-            print("ASR time:", time.time() - starting_ASR_time)
+                        r = requests.post(
+                            "http://slt.ufal.mff.cuni.cz:5003/offload_ASR",
+                            json={
+                                "session_id": session_id,
+                                "timestamp": timestamp,
+                                "ASR_result": result,
+                            },
+                            verify=False,
+                        )
+
+            # print("ASR time:", time.time() - starting_ASR_time)
 
         except Exception as e:
-            print("cannot connect to server" + str(e))
+            print("cannot connect to server " + str(e))
             time.sleep(5)
+
+        # time.sleep(1)
