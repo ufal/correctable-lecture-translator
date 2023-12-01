@@ -387,18 +387,6 @@ def create_tokenizer(lan):
 
 class ASRConfig:
     def __init__(self):
-        # self.original_language = "Czech"
-        # self.decode_options = dict(language=self.original_language, beam_size=5, best_of=5, without_timestamps=True)
-        # self.transcribe_options = dict(task="transcribe", fp16=torch.cuda.is_available(), no_speech_threshold=0.6, temperature=(
-        #     0.0, 0.2, 0.4, 0.6, 0.8, 1.0), verbose=True, condition_on_previous_text=True, **self.decode_options)
-        # self.translate_options = dict(task="translate", fp16=torch.cuda.is_available(), no_speech_threshold=0.6, temperature=(
-        #     0.0, 0.2, 0.4, 0.6, 0.8, 1.0), verbose=True, condition_on_previous_text=True, **self.decode_options)
-        # self.model = whisper.load_model("large")
-
-        # self.SAMPLING_RATE = 16000  # Hz
-        # self.AUDIO_SNIPPET_SECONDS = 30  # seconds
-        # self.AUDIO_SNIPPET_SIZE = self.SAMPLING_RATE * self.AUDIO_SNIPPET_SECONDS  # samples
-
         self.min_chunk_size = 1.0  # Minimum audio chunk size in seconds. It waits up to this time to do processing. If the processing takes shorter time, it waits, otherwise it processes the whole segment that was received by this time.
         self.model = "large-v2"  # Name size of the Whisper model to use (default: large-v2). The model is automatically downloaded from the model hub if not present in model cache dir.
         # tiny.en,tiny,base.en,base,small.en,small,medium.en,medium,large-v1,large-v2,large
@@ -418,8 +406,6 @@ if __name__ == "__main__":
     size = config.model
     language = config.language
 
-    t = time.time()
-
     if config.backend == "faster-whisper":
         asr_cls = FasterWhisperASR
 
@@ -433,14 +419,12 @@ if __name__ == "__main__":
     else:
         tgt_language = language  # Whisper transcribes in this language
 
-    e = time.time()
-
     if config.vad:
         asr.use_vad()
 
     min_chunk = config.min_chunk_size
     comp_node = ComputationNode(asr)
-    online1 = OnlineASRProcessor(comp_node, create_tokenizer(tgt_language))
+    online_asr = OnlineASRProcessor(comp_node, create_tokenizer(tgt_language))
 
     while True:
         try:
@@ -462,38 +446,36 @@ if __name__ == "__main__":
                 audio = np.array(audio, dtype=np.float32) / 32768.0
             audio = np.array(audio, dtype=np.float32)
 
-            starting_ASR_time = time.time()
+            config.language = source_language
+            # starting_ASR_time = time.time()
             if source_language == transcript_language:
-                config.language = source_language
-                end = 0
+                config.task = "transcribe"
+            else:
+                config.task = "translate"
 
-                online1.insert_audio_chunk(audio)
+            online_asr.insert_audio_chunk(audio)
 
-                try:
-                    o1 = online1.process_iter()
-                except AssertionError:
-                    print("assertion error", file=sys.stderr)
-                    pass
-                else:
-                    # output_transcript("Pheonix: ", o1)
-                    if o1[0] is not None:
-                        result = o1[2]
-                        print(result)
+            try:
+                o1 = online_asr.process_iter()
+            except AssertionError:
+                print("assertion error", file=sys.stderr)
+                pass
+            else:
+                if o1[0] is not None:
+                    result = o1[2]
+                    # print(result)
 
-                        r = requests.post(
-                            "http://slt.ufal.mff.cuni.cz:5003/offload_ASR",
-                            json={
-                                "session_id": session_id,
-                                "timestamp": timestamp,
-                                "ASR_result": result,
-                            },
-                            verify=False,
-                        )
+                    r = requests.post(
+                        "http://slt.ufal.mff.cuni.cz:5003/offload_ASR",
+                        json={
+                            "session_id": session_id,
+                            "timestamp": timestamp,
+                            "ASR_result": result,
+                        },
+                        verify=False,
+                    )
 
-            # print("ASR time:", time.time() - starting_ASR_time)
-
+            # print("ASR time: ", time.time() - starting_ASR_time, file=sys.stderr)
         except Exception as e:
-            print("cannot connect to server " + str(e))
+            print("cannot connect to server " + str(e), file=sys.stderr)
             time.sleep(5)
-
-        # time.sleep(1)
