@@ -28,3 +28,4 @@ backend/api/__pycache__/
 
 
 *.pem
+**.venv
