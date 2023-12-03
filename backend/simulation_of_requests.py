@@ -1,25 +1,30 @@
 import os
 import json
+import requests
+import time
 
 # I want to simulate sending one request evert second to localhost:5000
+
 
 def list_dir_sorted(path):
     files = os.listdir(path)
     files.sort(key=lambda x: int(x.split("_")[0]))
     return files
 
+
 # class for reading recording data from files:
 class Recording:
     def __init__(self, foldername):
         self.foldername = foldername
         self.data = self.read_data()
-    
+
     def read_data(self):
         data = []
         for filename in list_dir_sorted(self.foldername):
             with open(self.foldername + "/" + filename, "r") as f:
                 data.append({"timestamp": filename.split("_")[0], "chunk": json.load(f)})
         return data
+
 
 recordings_folder = "recordings/0/"
 
@@ -36,8 +41,7 @@ recordings = Recording(recordings_folder)
 
 # now every second send a json encoded request to localhost:5000
 # with the data from the recordings
-import requests
-import time
+
 
 stable = ""
 unstable = ""
@@ -49,4 +53,3 @@ for chunk in recordings.data:
     decoded = json.loads(r.text)
     print(chunk["timestamp"], decoded)
     time.sleep(1)
-
