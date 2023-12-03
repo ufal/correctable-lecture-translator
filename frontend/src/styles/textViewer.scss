@@ -1,46 +1,48 @@
 .translation {
-    margin-top: 25px;
+	margin-top: 25px;
 	padding: 10px;
-    font-family: Arial, Helvetica, sans-serif;
-    color: #262626;
-    line-height: 1.2;
-    overflow-y: scroll;
-    max-height: 92vh;
-    text-align: justify;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #262626;
+	line-height: 1.2;
+	overflow-y: scroll;
+	max-height: 92vh;
+	text-align: justify;
 }
 
 .editing {
-    overflow-y: scroll;
-    max-height: 92vh;
+	overflow-y: scroll;
+	max-height: 92vh;
 }
 
 .viewing {
-    margin: 100px;
-    max-height: 100%;
+	margin: 100px;
+	max-height: 100%;
 }
 
-.toggleEditor {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-}
+// .toggleEditor {
+//     position: fixed;
+//     top: 10px;
+//     right: 10px;
+// }
 
-.toggleUpdates {
-    position: fixed;
-    top: 58px;
-    left: 10px;
+// .toggleUpdates {
+//     position: fixed;
+//     top: 58px;
+//     left: 10px;
+// }
+
+.test {
+    color: red
 }
 
 .selectSession {
-    position: fixed;
-    top: 10px;
-    width: 176px;
-    left: 10px;
+	width: 176px;
+	margin: 20px 0 0 10px;
 }
 
 @media screen and (max-width: 600px) {
-    .translation {
-        margin: 90px 10px 10px 10px;
-        font-size: 24px !important;
-    }
+	.translation {
+		margin: 90px 10px 10px 10px;
+		font-size: 24px !important;
+	}
 }
