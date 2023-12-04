@@ -1,5 +1,5 @@
 <template lang="pug">
-.translation(:style="styleFontSize", v-html="getFinalText")
+.translation(v-html="getFinalText")
 </template>
 
 <script lang="ts">
@@ -11,10 +11,6 @@ import AsrClient from "@/utils/client";
 export default {
 	name: "text-viewer",
 	props: {
-		fontSize: {
-			type: Number,
-			required: true,
-		},
 		client: {
 			type: Object as PropType<AsrClient>,
 			required: true,
@@ -23,12 +19,6 @@ export default {
 			type: Array as PropType<TextChunk[]>,
 			required: true,
 		},
-	},
-
-	data() {
-		return {
-			styleFontSize: "font-size: " + this.fontSize.toString() + "px",
-		};
 	},
 
 	computed: {

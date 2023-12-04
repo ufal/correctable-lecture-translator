@@ -33,7 +33,6 @@ v-container.editor(v-if="editorMode")
 	br
 	//- div.editing-viewer-overlay
 	text-viewer.editing-viewer(
-		:fontSize=17,
 		:client="client",
 		:textChunks="textChunks"
 	)
@@ -56,7 +55,7 @@ v-container.viewer(v-else)
 			icon="mdi-pencil-outline",
 			@click="editorMode = !editorMode"
 		)
-	text-viewer(:fontSize=42, :client="client", :textChunks="textChunks")
+	text-viewer.viewing-viewer(:client="client", :textChunks="textChunks")
 
 </template>
 
