@@ -4,10 +4,12 @@ v-text-field.selectSession(
 	variant="solo",
 	density="compact"
 	label="Session name"
+	id="test"
+	flat
 )
 
 v-container(v-if="editorMode")
-	v-app-bar(:elevation="1")
+	v-app-bar(:elevation="0")
 		template(v-slot:prepend)
 			img(src="@/assets/logo.png")
 
@@ -19,6 +21,8 @@ v-container(v-if="editorMode")
 	//- v-col
 	text-editor.editing-editor(:client="client", :textChunks="textChunks")
 	//- v-col
+	br
+	//- div.editing-viewer-overlay
 	text-viewer.editing-viewer(
 		:fontSize=17,
 		:client="client",
@@ -26,7 +30,7 @@ v-container(v-if="editorMode")
 	)
 
 v-container(v-else)
-	v-app-bar(:elevation="1")
+	v-app-bar(:elevation="0")
 		template(v-slot:prepend)
 			img(src="@/assets/logo.png")
 		v-btn.toggleEditor(
@@ -160,6 +164,36 @@ export default {
 				version: 0,
 				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
 			},
+			{
+				timestamp: 12,
+				version: 0,
+				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich.  ",
+			},
+			{
+				timestamp: 13,
+				version: 0,
+				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
+			},
+			{
+				timestamp: 14,
+				version: 0,
+				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
+			},
+			{
+				timestamp: 15,
+				version: 0,
+				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
+			},
+			{
+				timestamp: 16,
+				version: 0,
+				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
+			},
+			{
+				timestamp: 17,
+				version: 0,
+				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
+			}
 		];
 	},
 };

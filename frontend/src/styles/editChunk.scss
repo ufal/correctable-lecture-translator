@@ -1,20 +1,18 @@
+@import 'theme';
+
 .container {
-	// width: 50%;
 	margin: 20px;
+	background: $overlay-low;
+	border-radius: 0.75rem;
+	box-shadow: none;
 }
 
 .editTextChunk {
-	font-family: Arial, Helvetica, sans-serif;
-	color: #262626;
+	color: $text;
 	font-size: 15px;
 	line-height: 1.2;
-	height: auto;
-	padding: 15px;
-	margin: 5px;
-	// border-bottom: 1px solid #ccc;
-	border-radius: 4px;
+	padding: 1.25rem;
 	&:focus {
-		// outline: 1px dashed red;;
 		outline: none;
 		box-shadow: 0 0 5px 1px #ccc;
 	}
