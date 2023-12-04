@@ -60,7 +60,7 @@ input:focus {
 }
 
 .editing-editor {
-	margin-top: 52px;
+	margin-top: 60px;
 	overflow-y: auto;
 	max-height: 55vh;
 	background: $surface;
@@ -78,7 +78,7 @@ input:focus {
 .translation {
 	max-height: 88vh;
 	background: $surface;
-	margin-top: 52px;
+	margin-top: 60px;
 	padding: 2.5rem;
 	line-height: 1.2;
 	overflow-y: scroll;
