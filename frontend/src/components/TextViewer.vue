@@ -33,7 +33,7 @@ export default {
 
 	computed: {
 		getFinalText() {
-			const colorGradient = ["#909090", "#c1c1c1"];
+			const colorGradient = ["#797593", "#9893a5"];
 			let finalText = this.textChunks
 				.slice(0, -colorGradient.length)
 				.map(({ text }) => text)

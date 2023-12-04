@@ -1,23 +1,32 @@
 <template lang="pug">
-v-text-field.selectSession(
-	v-model="sessionName",
-	variant="solo",
-	density="compact"
-	label="Session name"
-	id="test"
-	flat
-)
 
-v-container(v-if="editorMode")
+//- v-text-field.selectSession(
+//- 	v-model="sessionName",
+//- 	variant="solo",
+//- 	density="compact"
+//- 	label="Session name"
+//- 	id="selectSession"
+//- 	flat
+//- )
+
+v-container.editor(v-if="editorMode")
 	v-app-bar(:elevation="0")
 		template(v-slot:prepend)
-			img(src="@/assets/logo.png")
-
+			//- img(src="@/assets/logo.png")
+			.title Coletra - editor
+		v-text-field.selectSession(
+				v-model="sessionName",
+				variant="solo",
+				density="compact"
+				label="Session name"
+				id="selectSession"
+				flat
+			)
+		v-btn.toggleUpdates(:icon="toggleUpdatesIcon", :color="toggleUpdatesColor", @click="toggleUpdates")
 		v-btn.toggleEditor(
 			icon="mdi-text-box-outline",
 			@click="editorMode = !editorMode"
 		)
-		v-btn.toggleUpdates(:icon="toggleUpdatesIcon", @click="toggleUpdates")
 	//- v-col
 	text-editor.editing-editor(:client="client", :textChunks="textChunks")
 	//- v-col
@@ -29,16 +38,25 @@ v-container(v-if="editorMode")
 		:textChunks="textChunks"
 	)
 
-v-container(v-else)
+v-container.viewer(v-else)
 	v-app-bar(:elevation="0")
 		template(v-slot:prepend)
-			img(src="@/assets/logo.png")
+			//- img(src="@/assets/logo.png")
+			.title Coletra - viewer
+		v-text-field.selectSession(
+			v-model="sessionName",
+			variant="solo",
+			density="compact"
+			label="Session name"
+			id="selectSession"
+			flat
+		)
+		v-btn.toggleUpdates(:icon="toggleUpdatesIcon", :color="toggleUpdatesColor", @click="toggleUpdates")
 		v-btn.toggleEditor(
 			icon="mdi-pencil-outline",
 			@click="editorMode = !editorMode"
 		)
-		v-btn.toggleUpdates(:icon="toggleUpdatesIcon", @click="toggleUpdates")
-	text-viewer.viewing(:fontSize=42, :client="client", :textChunks="textChunks")
+	text-viewer(:fontSize=42, :client="client", :textChunks="textChunks")
 
 </template>
 
@@ -58,7 +76,8 @@ export default {
 			updateTextInterval: 1000,
 			updateIntervalId: 0,
 			toggleUpdatesIcon: "mdi-play",
-			editorMode: false,
+			editorMode: true,
+			toggleUpdatesColor: "#286983",
 		};
 	},
 
@@ -79,10 +98,12 @@ export default {
 				}
 			});
 
-			window.scroll({
-				top: document.body.scrollHeight,
-				behavior: "smooth",
-			});
+			if (!this.editorMode) {
+				window.scroll({
+					top: document.body.scrollHeight,
+					behavior: "smooth",
+				});
+			}
 		},
 
 		toggleUpdates() {
@@ -91,11 +112,13 @@ export default {
 
 				this.updateIntervalId = window.setInterval(this.updateText, this.updateTextInterval);
 				this.toggleUpdatesIcon = "mdi-pause";
+				this.toggleUpdatesColor = "#ea9d34";
 				console.info("Started updating text.");
 			} else {
 				window.clearInterval(this.updateIntervalId);
 				this.updateIntervalId = 0;
 				this.toggleUpdatesIcon = "mdi-play";
+				this.toggleUpdatesColor = "#286983";
 				console.info("Stopped updating text.");
 			}
 		},
@@ -193,7 +216,7 @@ export default {
 				timestamp: 17,
 				version: 0,
 				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
-			}
+			},
 		];
 	},
 };

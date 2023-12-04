@@ -1,41 +1,62 @@
-@import 'theme';
+@import "theme";
 
-#test {
-    background: $foam-low;
-    color: $text;
+@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&display=swap');
+
+.title {
+	margin-left: 0.5rem;
+	margin-top: 0.5rem;
+	color: $love;
+	font-size: 2.5rem;
+	font-weight: 600;
+	z-index: 9999;
+	font-family: 'Kalam', cursive;
+}
+
+.v-input__control {
+	grid-area: append !important;
+}
+
+.selectSession {
+	width: 176px;
+	margin-top: 22px;
+	margin-left: 3rem;
+	z-index: 9999;
+}
+#selectSession {
+	width: 176px;
+	background: $foam-low;
+	color: $text;
 	border: solid 1px $foam-medium;
 	border-radius: 0.375rem;
-	font-size: .915rem;
-    line-height: 1.25rem;
+	font-size: 0.915rem;
+	line-height: 1.25rem;
 }
 
 .v-field {
 	color: $foam-high !important;
 }
 
-.v-field .v-label{
-	opacity: 0.75 !important
+.v-field .v-label {
+	opacity: 0.75 !important;
 }
 
 .v-field--focused .v-label {
-	opacity: 1 !important
+	opacity: 1 !important;
 }
 
 input:focus {
-    color: $love !important;
+	color: $love !important;
 }
 
-.translation {
-	margin-top: 25px;
-	padding: 2.5rem;
-	line-height: 1.2;
-	overflow-y: scroll;
-	max-height: 92vh;
-	text-align: justify;
-	border-radius: 0.75rem;
+.toggleUpdates {
+	color: $pine;
+ }
+
+ .toggleEditor {
+	color: $love;
+ }
 
 
-}
 .editing-editor {
 	margin-top: 52px;
 	overflow-y: auto;
@@ -45,43 +66,24 @@ input:focus {
 	border-radius: 0.75rem;
 }
 
-// .editing-viewer-overlay {
-// 	background: $surface;
-// 	padding: 1.25rem;
-// 	border-radius: 0.75rem;
-// }
-
 .editing-viewer {
-	max-height: 34vh;
-	margin: 0;
+	max-height: 32vh !important;
+	margin: 0 !important;
 	background: $surface;
 }
 
-
-.viewing {
-	// margin: 100px;
-	max-height: 100%;
+.translation {
+	max-height: 88vh;
+	background: $surface;
+	margin-top: 52px;
+	padding: 2.5rem;
+	line-height: 1.2;
+	overflow-y: scroll;
+	text-align: justify;
+	border-radius: 0.75rem;
+	color: $love !important;
 }
 
-// .toggleEditor {
-//     position: fixed;
-//     top: 10px;
-//     right: 10px;
-// }
-
-// .toggleUpdates {
-//     position: fixed;
-//     top: 58px;
-//     left: 10px;
-// }
-
-.selectSession {
-	width: 176px;
-    position: absolute;
-    top: 12px;
-    left: 52px;
-    z-index: 9999;
-}
 
 
 @media screen and (max-width: 600px) {
@@ -90,29 +92,3 @@ input:focus {
 		font-size: 24px !important;
 	}
 }
-
-@import url('https://fonts.googleapis.com/css2?family=Hedvig+Letters+Sans&display=swap');
-
-
-// color: rgb(87, 82, 121);
-// background-color: #fffaf3;
-// border-radius: .75rem;
-// overflow: hidden;
-// /* box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px; */
-// padding: 1.25rem;
-// font-size: 17px;
-// font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-// font-weight: 400;
-
-
-// background-color: #f2e9e1;
-// /* border-radius: 5px; */
-// /* border-top-left-radius: 5px; */
-// /* border-top-right-radius: 5px; */
-// /* border-bottom-right-radius: 5px; */
-// /* border-bottom-left-radius: 5px; */
-// color: #575279;
-// font-family: ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,"Apple Color Emoji","Segoe UI Emoji",Segoe UI Symbol,"Noto Color Emoji";
-// font-weight: 700;
-// border-radius: .375rem;
-// border-top-left-radius: 0.

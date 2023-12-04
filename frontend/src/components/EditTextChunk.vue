@@ -10,13 +10,11 @@ v-card.container
 	v-btn.submitChanges(
 		v-if="showSubmit",
 		size="small",
-		color="#188B61",
 		@click="submitTextChunk"
 	) Submit
 	v-btn.discardChanges(
 		v-if="showSubmit",
 		size="small",
-		color="#bd3f4f",
 		@click="discardChanges"
 	) Discard
 </template>
@@ -44,8 +42,7 @@ export default {
 			originalText: "" as string,
 			updatedText: "" as string,
 			showSubmit: false,
-			highlightSpan:
-				"<span style='background-color: #E0D64E; color: black'>",
+			highlightSpan: "<span style='background-color: #cfdedd; color: black'>",
 		};
 	},
 	methods: {
@@ -61,22 +58,24 @@ export default {
 		},
 		onInput(e: any) {
 			this.updatedText = e.target.innerHTML;
-
-			if (this.updatedText != this.originalText) this.showSubmit = true;
-			else this.showSubmit = false;
+			if (this.updatedText.trim() != this.originalText.trim()) {
+				this.showSubmit = true;
+				console.log("submit");
+			} else {
+				console.log("discard");
+				this.showSubmit = false;
+			}
 		},
 		highlightFocused(e: any) {
 			this.chunk.text = this.highlightSpan + this.chunk.text + "</span>";
 		},
 		unhighlightFocused(e: any) {
-			this.chunk.text = this.chunk.text
-				.replace(this.highlightSpan, "")
-				.replace("</span>", "");
+			this.chunk.text = this.chunk.text.replace(this.highlightSpan, "").replace("</span>", "");
 		},
 		discardChanges() {
 			this.updatedText = this.originalText;
-			// Ugly hack to update displayed variable
-			// the space is discarded during html render
+			// Ugly hack to update displayed variable.
+			// The "space" is discarded during the render.
 			this.originalText = this.originalText + " ";
 			this.showSubmit = false;
 		},

@@ -1,28 +1,30 @@
 @import 'theme';
 
 .container {
-	margin: 20px;
+	margin: 1.15rem;
 	background: $overlay-low;
 	border-radius: 0.75rem;
 	box-shadow: none;
 }
 
 .editTextChunk {
-	color: $text;
+	color: $love;
 	font-size: 15px;
 	line-height: 1.2;
 	padding: 1.25rem;
 	&:focus {
 		outline: none;
-		box-shadow: 0 0 5px 1px #ccc;
 	}
 }
 
 .submitChanges {
-	margin: 10px;
-	color: white !important;
+	margin: 0 1rem 1rem 0.75rem;
+	color: $surface !important;
+	background: $pine;
 }
 
 .discardChanges {
-	color: white !important;
+	margin: 0 1rem 1rem 0;
+	color: $surface !important;
+	background: $rose;
 }
