@@ -9,13 +9,18 @@
 	text-align: justify;
 }
 
-.editing {
+.editing-editor {
 	overflow-y: scroll;
-	max-height: 92vh;
+	max-height: 60vh;
+}
+
+.editing-viewer {
+	overflow-y: scroll;
+	max-height: 40vh;
 }
 
 .viewing {
-	margin: 100px;
+	// margin: 100px;
 	max-height: 100%;
 }
 
@@ -31,13 +36,12 @@
 //     left: 10px;
 // }
 
-.test {
-    color: red
-}
-
 .selectSession {
 	width: 176px;
-	margin: 20px 0 0 10px;
+    position: absolute;
+    top: 12px;
+    left: 52px;
+    z-index: 9999;
 }
 
 @media screen and (max-width: 600px) {
@@ -46,3 +50,29 @@
 		font-size: 24px !important;
 	}
 }
+
+@import url('https://fonts.googleapis.com/css2?family=Hedvig+Letters+Sans&display=swap');
+
+
+// color: rgb(87, 82, 121);
+// background-color: #fffaf3;
+// border-radius: .75rem;
+// overflow: hidden;
+// /* box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px; */
+// padding: 1.25rem;
+// font-size: 17px;
+// font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+// font-weight: 400;
+
+
+// background-color: #f2e9e1;
+// /* border-radius: 5px; */
+// /* border-top-left-radius: 5px; */
+// /* border-top-right-radius: 5px; */
+// /* border-bottom-right-radius: 5px; */
+// /* border-bottom-left-radius: 5px; */
+// color: #575279;
+// font-family: ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,"Apple Color Emoji","Segoe UI Emoji",Segoe UI Symbol,"Noto Color Emoji";
+// font-weight: 700;
+// border-radius: .375rem;
+// border-top-left-radius: 0.

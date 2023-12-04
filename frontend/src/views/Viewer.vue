@@ -1,24 +1,25 @@
 <template lang="pug">
-
+v-text-field.selectSession(
+	v-model="sessionName",
+	variant="solo",
+	density="compact"
+	label="Session name"
+)
 
 v-container(v-if="editorMode")
 	v-app-bar(:elevation="1")
 		template(v-slot:prepend)
 			img(src="@/assets/logo.png")
-			v-text-field.selectSession(
-				v-model="sessionName",
-				variant="solo",
-				density="compact"
-			)
+
 		v-btn.toggleEditor(
 			icon="mdi-text-box-outline",
 			@click="editorMode = !editorMode"
 		)
 		v-btn.toggleUpdates(:icon="toggleUpdatesIcon", @click="toggleUpdates")
 	//- v-col
-	text-editor.editing(:client="client", :textChunks="textChunks")
+	text-editor.editing-editor(:client="client", :textChunks="textChunks")
 	//- v-col
-	text-viewer.editing(
+	text-viewer.editing-viewer(
 		:fontSize=17,
 		:client="client",
 		:textChunks="textChunks"
@@ -28,12 +29,6 @@ v-container(v-else)
 	v-app-bar(:elevation="1")
 		template(v-slot:prepend)
 			img(src="@/assets/logo.png")
-			v-text-field.selectSession(
-				v-model="sessionName",
-				variant="solo",
-				density="compact"
-				label="Session name"
-			)
 		v-btn.toggleEditor(
 			icon="mdi-pencil-outline",
 			@click="editorMode = !editorMode"
