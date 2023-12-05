@@ -17,11 +17,9 @@ v-container.editor(v-if="editorMode")
 			icon="mdi-text-box-outline",
 			@click="editorMode = !editorMode"
 		)
-	//- v-col
+	dictionary(:client="client")
 	text-editor.editing-editor(:client="client", :textChunks="textChunks")
-	//- v-col
 	br
-	//- div.editing-viewer-overlay
 	text-viewer.editing-viewer(
 		:client="client",
 		:textChunks="textChunks"
@@ -54,6 +52,7 @@ import AsrClient from "@/utils/client";
 import { TextChunk, TextChunkVersions } from "@/utils/chunk";
 import TextViewer from "@/components/TextViewer.vue";
 import TextEditor from "@/components/TextEditor.vue";
+import Dictionary from "@/components/Dictionary.vue";
 
 export default {
 	data() {

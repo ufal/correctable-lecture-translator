@@ -11,6 +11,7 @@ import TextViewer from "./components/TextViewer.vue";
 import EditTextChunk from "./components/EditTextChunk.vue";
 import Editor from "@/components/TextEditor.vue";
 import SessionList from "@/components/SessionList.vue";
+import Dictionary from "@/components/Dictionary.vue";
 
 
 // Composables
@@ -25,6 +26,7 @@ app.component("text-viewer", TextViewer);
 app.component("edit-text-chunk", EditTextChunk);
 app.component("text-editor", Editor);
 app.component("session-list", SessionList);
+app.component("dictionary", Dictionary);
 
 registerPlugins(app);
 
