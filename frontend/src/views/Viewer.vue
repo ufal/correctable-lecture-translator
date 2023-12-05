@@ -123,15 +123,14 @@ export default {
 	async mounted() {
 		// this.textChunks = await this.client.getLatestTextChunks({});
 		// Dummy debug text chunks
-		let appBar = document.getElementById("appBar");
-		let previousScrollY = window.scrollY;
 		document.onscroll = () => {
+			let appBar = document.getElementById("appBar");
 			if (window.scrollY > 10) {
-				appBar?.classList.add("app-bar-shadow");
+				console.log("add shadow");
+				if (!appBar?.classList.contains("app-bar-shadow")) appBar?.classList.add("app-bar-shadow");
 			} else {
-				appBar?.classList.remove("app-bar-shadow");
+				if (appBar?.classList.contains("app-bar-shadow")) appBar?.classList.remove("app-bar-shadow");
 			}
-			previousScrollY = window.scrollY;
 		};
 
 		this.textChunks = [
