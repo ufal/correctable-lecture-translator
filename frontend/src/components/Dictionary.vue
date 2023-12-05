@@ -1,7 +1,8 @@
 <template lang="pug">
 v-container.dict
-    img(src="@/assets/dict-line.png")
-    img(src="@/assets/dict-line-pine.png")
+    .test
+    img.line(src="@/assets/dict-line.png")
+    //- img(src="@/assets/dict-line-pine.png")
 </template>
 
 <script lang="ts">

@@ -1,9 +1,17 @@
 <template lang="pug">
 
 v-container.editor(v-if="editorMode")
-	v-app-bar(:elevation="0")
+	v-app-bar#appBar(:elevation="0")
 		template(v-slot:prepend)
-			.title Coletra - editor
+			//- img(src="@/assets/logo.png")
+			v-btn.toggleEditor(
+				icon="mdi-translate",
+				@click="editorMode = !editorMode"
+			)
+			.title Coletra
+			v-divider.logoSpacer(vertical, inset, thickness="2", length="40")
+			.v-btn(@click="editorMode = false").menuBtn Viewer
+			.v-btn(@click="editorMode = true").menuEditor Editor
 		v-text-field.selectSession(
 				v-model="sessionName",
 				variant="solo",
@@ -13,10 +21,10 @@ v-container.editor(v-if="editorMode")
 				flat
 			)
 		v-btn.toggleUpdates(:icon="toggleUpdatesIcon", :color="toggleUpdatesColor", @click="toggleUpdates")
-		v-btn.toggleEditor(
-			icon="mdi-text-box-outline",
-			@click="editorMode = !editorMode"
-		)
+		//- v-btn.toggleEditor(
+		//- 	icon="mdi-text-box-outline",
+		//- 	@click="editorMode = !editorMode"
+		//- )
 	dictionary(:client="client")
 	text-editor.editing-editor(:client="client", :textChunks="textChunks")
 	br
@@ -28,7 +36,9 @@ v-container.editor(v-if="editorMode")
 v-container.viewer(v-else)
 	v-app-bar(:elevation="0")
 		template(v-slot:prepend)
-			.title Coletra - viewer
+			img(src="@/assets/logo.png")
+			.v-btn(@click="editorMode = false") Viewer
+			.v-btn(@click="editorMode = true") Editor
 		v-text-field.selectSession(
 			v-model="sessionName",
 			variant="solo",
@@ -38,10 +48,10 @@ v-container.viewer(v-else)
 			flat
 		)
 		v-btn.toggleUpdates(:icon="toggleUpdatesIcon", :color="toggleUpdatesColor", @click="toggleUpdates")
-		v-btn.toggleEditor(
-			icon="mdi-pencil-outline",
-			@click="editorMode = !editorMode"
-		)
+		//- v-btn.toggleEditor(
+		//- 	icon="mdi-pencil-outline",
+		//- 	@click="editorMode = !editorMode"
+		//- )
 	text-viewer.viewing-viewer(:client="client", :textChunks="textChunks")
 
 </template>
@@ -64,7 +74,7 @@ export default {
 			updateIntervalId: 0,
 			toggleUpdatesIcon: "mdi-play",
 			editorMode: true,
-			toggleUpdatesColor: "#286983",
+			toggleUpdatesColor: "#575279",
 		};
 	},
 
@@ -113,6 +123,17 @@ export default {
 	async mounted() {
 		// this.textChunks = await this.client.getLatestTextChunks({});
 		// Dummy debug text chunks
+		let appBar = document.getElementById("appBar");
+		let previousScrollY = window.scrollY;
+		document.onscroll = () => {
+			if (window.scrollY > 10) {
+				appBar?.classList.add("app-bar-shadow");
+			} else {
+				appBar?.classList.remove("app-bar-shadow");
+			}
+			previousScrollY = window.scrollY;
+		};
+
 		this.textChunks = [
 			{
 				timestamp: 0,

@@ -2,8 +2,23 @@
 
 @import url("https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&display=swap");
 
-html {
-    overflow-y: auto !important;
+@import url("https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap");
+
+#appBar {
+	transition: none !important;
+}
+
+.app-bar-shadow {
+	box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px !important;
+}
+
+.menuEditor {
+	// background: $surface;
+	border: solid 2px $love;
+	color: $text;
+	padding: 0.75rem;
+	border-radius: 0.75rem;
+	margin-left: 1rem;
 }
 
 .v-container {
@@ -13,11 +28,25 @@ html {
 .title {
 	margin-left: 0.5rem;
 	margin-top: 0.5rem;
-	color: $love;
+	color: $rose;
 	font-size: 2.5rem;
-	font-weight: 600;
+	font-weight: 700;
 	z-index: 9999;
-	font-family: "Kalam", cursive;
+	// font-family: "Kalam", cursive;
+	font-family: "Josefin Sans", sans-serif;
+}
+
+.logoSpacer {
+	margin-left: 1rem;
+	margin-right: 0.5rem;
+	margin-top: 0.75rem !important;
+	color: $love;
+	opacity: 1;
+}
+
+.menuBtn {
+	color: $love;
+	margin-left: 1rem;
 }
 
 .v-input__control {
@@ -25,22 +54,25 @@ html {
 }
 
 .selectSession {
-	margin-top: 22px;
+	margin-top: 21px;
 	margin-left: 3rem;
 	z-index: 9999;
 }
 #selectSession {
-	width: 176px;
-	background: $foam-low;
+	width: 15.5rem;
+	height: 3rem;
+	background: $surface;
+	// background: $surface;
 	color: $text;
-	border: solid 1px $foam-medium;
-	border-radius: 0.375rem;
+	border-radius: 0.75rem;
+	// border: solid 1px $love;
 	font-size: 0.915rem;
 	line-height: 1.25rem;
 }
 
 .v-field {
-	color: $foam-high !important;
+	color: $love !important;
+	border-radius: 0.75rem !important;
 }
 
 .v-field .v-label {
@@ -56,11 +88,11 @@ input:focus {
 }
 
 .toggleUpdates {
-	color: $pine;
+	color: $love;
 }
 
 .toggleEditor {
-	color: $love;
+	color: $rose;
 }
 
 .editing-editor {

@@ -1,8 +1,23 @@
 @import "theme";
 
 .dict {
+    display: flex;
 	background: $surface;
+	margin-top: 2rem;
+	border-radius: 0.75rem;
+	margin-top: 70px; /* TODO: remove this */
+}
+
+.line {
+    width: 575px;
+    height: 51px;
     margin-top: 2rem;
-    border-radius: 0.75rem;
-    margin-top: 70px; /* TODO: remove this */
+    margin-left: -5px;
+}
+
+.test {
+	width: 75px;
+	height: 100px;
+	background: radial-gradient(circle at 0%, $surface 65%, $love 80%);
+	border-radius: 100%;
 }
