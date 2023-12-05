@@ -5,7 +5,7 @@
 <script lang="ts">
 import { TextChunk } from "@/utils/chunk";
 import type { PropType } from "vue";
-import "@/styles/editChunk.scss";
+import "@/styles/textViewer.scss";
 import AsrClient from "@/utils/client";
 
 export default {

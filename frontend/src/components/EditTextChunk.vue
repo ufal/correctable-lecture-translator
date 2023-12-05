@@ -7,22 +7,35 @@ v-card.container
 		@blur="unhighlightFocused",
 		v-html="originalText"
 	)
-	v-btn.submitChanges(
-		v-if="showSubmit",
-		size="small",
-		@click="submitTextChunk"
-	) Submit
-	v-btn.discardChanges(
-		v-if="showSubmit",
-		size="small",
-		@click="discardChanges"
-	) Discard
+	v-card-actions.actions
+		v-btn.submitChanges(
+			v-if="showSubmit",
+			size="small",
+			@click="submitTextChunk"
+		) Submit
+		v-btn.discardChanges(
+			v-if="showSubmit",
+			size="small",
+			@click="discardChanges"
+		) Discard
+
+		v-container.feedback
+			v-btn.like(
+				size="small",
+				:icon="likeIcon",
+				@click="likeTextChunk"
+			)
+			v-btn.dislike(
+				size="small",
+				:icon="dislikeIcon",
+				@click="dislikeTextChunk"
+			)
 </template>
 
 <script lang="ts">
 import { TextChunk } from "@/utils/chunk";
 import type { PropType } from "vue";
-import "@/styles/editChunk.scss";
+import "@/styles/editTextChunk.scss";
 import AsrClient from "@/utils/client";
 
 export default {
@@ -43,6 +56,8 @@ export default {
 			updatedText: "" as string,
 			showSubmit: false,
 			highlightSpan: "<span style='background-color: #cfdedd; color: black'>",
+			likeIcon: "mdi-thumb-up-outline",
+			dislikeIcon: "mdi-thumb-down-outline",
 		};
 	},
 	methods: {
@@ -78,6 +93,32 @@ export default {
 			// The "space" is discarded during the render.
 			this.originalText = this.originalText + " ";
 			this.showSubmit = false;
+		},
+		likeTextChunk() {
+			if (this.likeIcon == "mdi-thumb-up-outline") {
+				this.likeIcon = "mdi-thumb-up";
+				if (this.dislikeIcon == "mdi-thumb-down") {
+					this.dislikeIcon = "mdi-thumb-down-outline";
+					// this.client.undislikeTextChunk(this.chunk);
+				}
+				// this.client.likeTextChunk(this.chunk);
+			} else {
+				this.likeIcon = "mdi-thumb-up-outline";
+				// this.client.unlikeTextChunk(this.chunk);
+			}
+		},
+		dislikeTextChunk() {
+			if (this.dislikeIcon == "mdi-thumb-down-outline") {
+				this.dislikeIcon = "mdi-thumb-down";
+				if (this.likeIcon == "mdi-thumb-up") {
+					this.likeIcon = "mdi-thumb-up-outline";
+					// this.client.unlikeTextChunk(this.chunk);
+				}
+				// this.client.dislikeTextChunk(this.chunk);
+			} else {
+				this.dislikeIcon = "mdi-thumb-down-outline";
+				// this.client.undislikeTextChunk(this.chunk);
+			}
 		},
 	},
 

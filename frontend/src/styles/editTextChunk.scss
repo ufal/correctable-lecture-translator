@@ -1,4 +1,4 @@
-@import 'theme';
+@import "theme";
 
 .container {
 	margin: 1.15rem;
@@ -17,16 +17,40 @@
 	}
 }
 
+.actions {
+	min-height: 0;
+	height: 2rem;
+}
+
 .submitChanges {
-	margin: 0 1rem 1rem 0.75rem;
+	margin: -2rem 0 -1rem 0.5rem;
 	color: $surface !important;
 	background: $pine;
 }
 
 .discardChanges {
-	margin: 0 1rem 1rem 0;
+	margin: -2rem 0 -1rem 0;
 	color: $surface !important;
 	background: $rose;
+}
+
+.feedback {
+	width: 7rem !important;
+	padding: 0 !important;
+	padding-left: 2rem !important;
+	margin-right: 0 !important;
+	margin-top: -2.75rem;
+	margin-bottom: -1.75rem;
+}
+
+.like {
+	color: $pine !important;
+	margin: 0 !important;
+}
+
+.dislike {
+	color: $rose !important;
+	margin: 0 !important;
 }
 
 @media screen and (max-width: 600px) {

@@ -1,18 +1,8 @@
 <template lang="pug">
 
-//- v-text-field.selectSession(
-//- 	v-model="sessionName",
-//- 	variant="solo",
-//- 	density="compact"
-//- 	label="Session name"
-//- 	id="selectSession"
-//- 	flat
-//- )
-
 v-container.editor(v-if="editorMode")
 	v-app-bar(:elevation="0")
 		template(v-slot:prepend)
-			//- img(src="@/assets/logo.png")
 			.title Coletra - editor
 		v-text-field.selectSession(
 				v-model="sessionName",
@@ -40,7 +30,6 @@ v-container.editor(v-if="editorMode")
 v-container.viewer(v-else)
 	v-app-bar(:elevation="0")
 		template(v-slot:prepend)
-			//- img(src="@/assets/logo.png")
 			.title Coletra - viewer
 		v-text-field.selectSession(
 			v-model="sessionName",
@@ -60,7 +49,7 @@ v-container.viewer(v-else)
 </template>
 
 <script lang="ts">
-import "@/styles/textViewer.scss";
+import "@/styles/viewer.scss";
 import AsrClient from "@/utils/client";
 import { TextChunk, TextChunkVersions } from "@/utils/chunk";
 import TextViewer from "@/components/TextViewer.vue";
