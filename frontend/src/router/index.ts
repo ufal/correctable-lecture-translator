@@ -7,12 +7,12 @@ const routes = [
 		component: () => import("@/views/Home.vue"),
 	},
 	{
-		path: "/viewer",
-		component: () => import("@/views/Viewer.vue"),
+		path: "/viewing",
+		component: () => import("@/views/Viewing.vue"),
 	},
 	{
-		path: "/recorder",
-		component: () => import("@/views/Recorder.vue"),
+		path: "/recording",
+		component: () => import("@/views/Recording.vue"),
 	},
 ];
 

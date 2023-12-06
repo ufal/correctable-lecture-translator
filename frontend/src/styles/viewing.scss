@@ -12,13 +12,16 @@
 	box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px !important;
 }
 
-.menuEditor {
-	// background: $surface;
-	border: solid 2px $love;
+.menuBtn {
 	color: $text;
 	padding: 0.75rem;
 	border-radius: 0.75rem;
 	margin-left: 1rem;
+	border: solid 2px $base;
+}
+
+.menuBtn.active {
+	border: solid 2px $love;
 }
 
 .v-container {
@@ -44,11 +47,6 @@
 	opacity: 1;
 }
 
-.menuBtn {
-	color: $love;
-	margin-left: 1rem;
-}
-
 .v-input__control {
 	grid-area: append !important;
 }
@@ -62,10 +60,8 @@
 	width: 15.5rem;
 	height: 3rem;
 	background: $surface;
-	// background: $surface;
 	color: $text;
 	border-radius: 0.75rem;
-	// border: solid 1px $love;
 	font-size: 0.915rem;
 	line-height: 1.25rem;
 }
@@ -89,10 +85,6 @@ input:focus {
 
 .toggleUpdates {
 	color: $love;
-}
-
-.toggleEditor {
-	color: $rose;
 }
 
 .editing-editor {

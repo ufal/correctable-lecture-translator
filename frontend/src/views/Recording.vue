@@ -16,7 +16,7 @@ audio-recorder(:asrClient="client", :sampleRate="sampleRate")
 import AsrClient from "@/utils/client";
 import AudioRecorder from "@/components/AudioRecorder.vue";
 import SessionList from "@/components/SessionList.vue";
-import "@/styles/recorder.scss";
+import "@/styles/recording.scss";
 
 export default {
 	data() {

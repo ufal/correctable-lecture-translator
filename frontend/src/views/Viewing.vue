@@ -1,30 +1,27 @@
 <template lang="pug">
 
+v-app-bar#appBar(:elevation="0")
+	template(v-slot:prepend)
+		//- img(src="@/assets/logo.png")
+		v-btn.toggleEditor(
+			icon="mdi-translate",
+			@click="editorMode = !editorMode"
+		)
+		.title Coletra
+		v-divider.logoSpacer(vertical, inset, thickness="2", length="40")
+		.v-btn(@click="editorMode = false").menuBtn Viewer
+		.v-btn(@click="editorMode = true").menuBtn.active Editor
+	v-text-field.selectSession(
+			v-model="sessionName",
+			variant="solo",
+			density="compact"
+			label="Session name"
+			id="selectSession"
+			flat
+		)
+	v-btn.toggleUpdates(:icon="toggleUpdatesIcon", :color="toggleUpdatesColor", @click="toggleUpdates")
+
 v-container.editor(v-if="editorMode")
-	v-app-bar#appBar(:elevation="0")
-		template(v-slot:prepend)
-			//- img(src="@/assets/logo.png")
-			v-btn.toggleEditor(
-				icon="mdi-translate",
-				@click="editorMode = !editorMode"
-			)
-			.title Coletra
-			v-divider.logoSpacer(vertical, inset, thickness="2", length="40")
-			.v-btn(@click="editorMode = false").menuBtn Viewer
-			.v-btn(@click="editorMode = true").menuEditor Editor
-		v-text-field.selectSession(
-				v-model="sessionName",
-				variant="solo",
-				density="compact"
-				label="Session name"
-				id="selectSession"
-				flat
-			)
-		v-btn.toggleUpdates(:icon="toggleUpdatesIcon", :color="toggleUpdatesColor", @click="toggleUpdates")
-		//- v-btn.toggleEditor(
-		//- 	icon="mdi-text-box-outline",
-		//- 	@click="editorMode = !editorMode"
-		//- )
 	dictionary(:client="client")
 	text-editor.editing-editor(:client="client", :textChunks="textChunks")
 	br
@@ -34,30 +31,12 @@ v-container.editor(v-if="editorMode")
 	)
 
 v-container.viewer(v-else)
-	v-app-bar(:elevation="0")
-		template(v-slot:prepend)
-			img(src="@/assets/logo.png")
-			.v-btn(@click="editorMode = false") Viewer
-			.v-btn(@click="editorMode = true") Editor
-		v-text-field.selectSession(
-			v-model="sessionName",
-			variant="solo",
-			density="compact"
-			label="Session name"
-			id="selectSession"
-			flat
-		)
-		v-btn.toggleUpdates(:icon="toggleUpdatesIcon", :color="toggleUpdatesColor", @click="toggleUpdates")
-		//- v-btn.toggleEditor(
-		//- 	icon="mdi-pencil-outline",
-		//- 	@click="editorMode = !editorMode"
-		//- )
 	text-viewer.viewing-viewer(:client="client", :textChunks="textChunks")
 
 </template>
 
 <script lang="ts">
-import "@/styles/viewer.scss";
+import "@/styles/viewing.scss";
 import AsrClient from "@/utils/client";
 import { TextChunk, TextChunkVersions } from "@/utils/chunk";
 import TextViewer from "@/components/TextViewer.vue";
@@ -122,7 +101,17 @@ export default {
 	},
 	async mounted() {
 		// this.textChunks = await this.client.getLatestTextChunks({});
-		// Dummy debug text chunks
+		var btns = document.getElementsByClassName("menuBtn");
+		for (var i = 0; i < btns.length; i++) {
+			btns[i].addEventListener("click", function () {
+				var current = document.getElementsByClassName("active");
+				if (current.length > 0) {
+					current[0].className = current[0].className.replace(" active", "");
+				}
+				this.className += " active";
+			});
+		}
+
 		document.onscroll = () => {
 			let appBar = document.getElementById("appBar");
 			if (window.scrollY > 10) {
@@ -133,6 +122,7 @@ export default {
 			}
 		};
 
+		// Dummy debug text chunks
 		this.textChunks = [
 			{
 				timestamp: 0,
