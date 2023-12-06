@@ -18,10 +18,16 @@
 	border-radius: 0.75rem;
 	margin-left: 1rem;
 	border: solid 2px $base;
+	cursor: pointer;
+}
+
+
+.menuBtn:hover {
+	background: $iris-low;
 }
 
 .menuBtn.active {
-	border: solid 2px $love;
+	background: $iris-low;
 }
 
 .v-container {

@@ -1,7 +1,8 @@
 @import "theme";
 
 .dict {
-    display: flex;
+	display: flex;
+	justify-content: center;
 	background: $surface;
 	margin-top: 2rem;
 	border-radius: 0.75rem;
@@ -9,15 +10,79 @@
 }
 
 .line {
-    width: 575px;
-    height: 51px;
-    margin-top: 2rem;
-    margin-left: -5px;
+	width: 575px;
+	height: 51px;
+	margin-top: 2rem;
+	margin-left: -5px;
 }
 
-.test {
-	width: 75px;
-	height: 100px;
-	background: radial-gradient(circle at 0%, $surface 65%, $love 80%);
-	border-radius: 100%;
+.arrow {
+	color: $love;
+	opacity: 0.75;
+	margin: 0.75rem 1rem 0 1rem;
+	margin: auto;
 }
+
+.words {
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+	padding: 0;
+	margin-left: 0.5rem;
+}
+
+.wordFrom {
+	width: 100%;
+	text-align: center;
+	border-radius: 0.75rem;
+	margin: 0.5rem 1rem 0.5rem 1rem;
+	// background: #cfdedd28;
+	background: #907aa919;
+	border: solid 2px $love;
+}
+
+.wordFrom.disable {
+	background: $overlay-low;
+	border: solid 2px $surface;
+}
+
+.wordTo {
+	width: 100%;
+	text-align: center;
+	margin: auto;
+	background: $overlay-low;
+	border-radius: 0.75rem;
+	background: #cfdedd28;
+	border: solid 2px $foam-high;
+}
+
+.actions {
+	background: $overlay-low;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	position: relative;
+	height: 0;
+	left: -3.25rem;
+	top: -1.25rem;
+	width: 2rem;
+}
+
+.action {
+	background: none;
+}
+
+.action.disable {
+	color: $love;
+}
+
+.action.delete {
+	color: $rose;
+}
+
+// .test {
+// 	width: 75px;
+// 	height: 100px;
+// 	background: radial-gradient(circle at 0%, $surface 65%, $love 80%);
+// 	border-radius: 100%;
+// }
