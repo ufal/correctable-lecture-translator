@@ -23,7 +23,7 @@ v-app-bar#appBar(:elevation="0")
 
 v-container.editor(v-if="editorMode")
 	dictionary(:client="client")
-	text-editor.editing-editor(:client="client", :textChunks="textChunks")
+	text-editor(:client="client", :textChunks="textChunks")
 	br
 	text-viewer.editing-viewer(
 		:client="client",

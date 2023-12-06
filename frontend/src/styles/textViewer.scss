@@ -1,20 +1,28 @@
-@import 'theme';
+@import "theme";
+
+$textViewerHeight: 88vh;
+
+.textViewer {
+	max-height: $textViewerHeight;
+	background: $surface;
+	padding: 2.5rem;
+	border-radius: 0.75rem;
+}
 
 .translation {
-	max-height: 88vh;
-	background: $surface;
-	margin-top: 60px;
-	padding: 2.5rem;
-	line-height: 1.2;
-	overflow-y: scroll;
-	text-align: justify;
-	border-radius: 0.75rem;
+	overflow-y: auto;
+	max-height: calc($textViewerHeight - 8vh) !important;
 	color: $text !important;
+	text-align: justify;
+	line-height: 1.2;
+	padding: 1rem;
 }
 
 @media screen and (max-width: 600px) {
+	.textViewer {
+		padding: 0.5rem;
+	}
 	.translation {
-		padding: 1.25rem;
 		font-size: 1rem;
 	}
 }

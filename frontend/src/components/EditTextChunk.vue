@@ -75,9 +75,7 @@ export default {
 			this.updatedText = e.target.innerHTML;
 			if (this.updatedText.trim() != this.originalText.trim()) {
 				this.showSubmit = true;
-				console.log("submit");
 			} else {
-				console.log("discard");
 				this.showSubmit = false;
 			}
 		},

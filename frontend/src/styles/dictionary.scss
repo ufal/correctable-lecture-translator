@@ -1,20 +1,30 @@
 @import "theme";
 
 .dict {
+	background: $surface;
+	margin-top: 70px;
+	border-radius: 0.75rem;
+	padding: 1.5rem;
 	display: flex;
 	justify-content: center;
-	background: $surface;
-	margin-top: 2rem;
-	border-radius: 0.75rem;
-	margin-top: 70px; /* TODO: remove this */
+	flex-wrap: wrap;
 }
 
-.line {
-	width: 575px;
-	height: 51px;
-	margin-top: 2rem;
-	margin-left: -5px;
+.record {
+	width: 100%;
+	display: flex;
+	background: $overlay-low;
+	border-radius: 0.75rem;
+	padding: 1rem;
+	margin: 1rem;
 }
+
+// .line {
+// 	width: 575px;
+// 	height: 51px;
+// 	margin-top: 2rem;
+// 	margin-left: -5px;
+// }
 
 .arrow {
 	color: $love;
@@ -36,14 +46,18 @@
 	text-align: center;
 	border-radius: 0.75rem;
 	margin: 0.5rem 1rem 0.5rem 1rem;
-	// background: #cfdedd28;
-	background: #907aa919;
+	background: $iris-low;
 	border: solid 2px $love;
 }
 
-.wordFrom.disable {
-	background: $overlay-low;
-	border: solid 2px $surface;
+.wordFrom.disable{
+	background: rgba($iris-low, 0.75);
+	border: solid 2px $overlay-low;
+}
+
+.wordFrom.disable > span{
+	background: none;
+	opacity: 0.5;
 }
 
 .wordTo {
@@ -56,7 +70,7 @@
 	border: solid 2px $foam-high;
 }
 
-.actions {
+.dictActions {
 	background: $overlay-low;
 	display: flex;
 	flex-wrap: wrap;
@@ -68,21 +82,22 @@
 	width: 2rem;
 }
 
-.action {
+.dictAction {
 	background: none;
 }
 
-.action.disable {
+.dictAction.disable {
 	color: $love;
 }
 
-.action.delete {
+.dictAction.delete {
 	color: $rose;
 }
 
-// .test {
-// 	width: 75px;
-// 	height: 100px;
-// 	background: radial-gradient(circle at 0%, $surface 65%, $love 80%);
-// 	border-radius: 100%;
-// }
+.newEntry {
+	margin:auto;
+	background: none;
+	color: $love !important;
+	opacity: 0.35;
+	font-size: 1.5rem;
+}

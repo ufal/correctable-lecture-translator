@@ -1,5 +1,7 @@
 <template lang="pug">
-.translation(v-html="getFinalText")
+.textViewer
+	.subTitle Text viewer
+	.translation(v-html="getFinalText")
 </template>
 
 <script lang="ts">
@@ -20,7 +22,6 @@ export default {
 			required: true,
 		},
 	},
-
 	computed: {
 		getFinalText() {
 			const colorGradient = ["#797593", "#9893a5"];
