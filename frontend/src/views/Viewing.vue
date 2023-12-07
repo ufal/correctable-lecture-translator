@@ -116,7 +116,6 @@ export default {
 		document.onscroll = () => {
 			let appBar = document.getElementById("appBar");
 			if (window.scrollY > 10) {
-				console.log("add shadow");
 				if (!appBar?.classList.contains("app-bar-shadow")) appBar?.classList.add("app-bar-shadow");
 			} else {
 				if (appBar?.classList.contains("app-bar-shadow")) appBar?.classList.remove("app-bar-shadow");

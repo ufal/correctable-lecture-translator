@@ -19,13 +19,6 @@
 	margin: 1rem;
 }
 
-// .line {
-// 	width: 575px;
-// 	height: 51px;
-// 	margin-top: 2rem;
-// 	margin-left: -5px;
-// }
-
 .arrow {
 	color: $love;
 	opacity: 0.75;
@@ -42,12 +35,14 @@
 }
 
 .wordFrom {
-	width: 100%;
+	// width: 100%;
 	text-align: center;
 	border-radius: 0.75rem;
 	margin: 0.5rem 1rem 0.5rem 1rem;
 	background: $iris-low;
 	border: solid 2px $love;
+	max-width: 26rem !important;
+	word-wrap: break-word;
 }
 
 .wordFrom.disable{
@@ -70,7 +65,7 @@
 	border: solid 2px $foam-high;
 }
 
-.dictActions {
+.wordActions {
 	background: $overlay-low;
 	display: flex;
 	flex-wrap: wrap;
@@ -82,16 +77,22 @@
 	width: 2rem;
 }
 
-.dictAction {
+.wordAction {
 	background: none;
 }
 
-.dictAction.disable {
+.wordAction.disable {
 	color: $love;
 }
 
-.dictAction.delete {
+.wordAction.delete {
 	color: $rose;
+}
+
+.dictActions {
+	margin-left: -8.25rem;
+    height: 197%;
+    padding: 0rem;
 }
 
 .newEntry {

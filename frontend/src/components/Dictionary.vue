@@ -4,25 +4,32 @@ v-container.dict
 	.record
 		v-container.words
 			v-container.wordFrom
-				.dictActions
-					v-btn.dictAction.disable(flat, size="x-small", icon="mdi-eye-off-outline")
-					v-btn.dictAction.delete(flat, size="x-small" icon="mdi-delete-forever-outline")
-				span TEST
+				.wordActions
+					v-btn.wordAction.disable(flat, size="x-small", icon="mdi-eye-off-outline")
+					v-btn.wordAction.delete(flat, size="x-small" icon="mdi-delete-forever-outline")
+				span Robert
 			v-container.wordFrom
-				.dictActions
-					v-btn.dictAction.disable(flat, size="x-small", icon="mdi-eye-off-outline")
-					v-btn.dictAction.delete(flat, size="x-small" icon="mdi-delete-forever-outline")
-				span TEST
+				.wordActions
+					v-btn.wordAction.disable(flat, size="x-small", icon="mdi-eye-off-outline")
+					v-btn.wordAction.delete(flat, size="x-small" icon="mdi-delete-forever-outline")
+				span Replace this many words with a single beautiful fancy word
 			v-container.wordFrom
-				.dictActions
-					v-btn.dictAction.disable(flat, size="x-small", icon="mdi-eye-off-outline")
-					v-btn.dictAction.delete(flat, size="x-small" icon="mdi-delete-forever-outline")
-				span TEST
+				.wordActions
+					v-btn.wordAction.disable(flat, size="x-small", icon="mdi-eye-off-outline")
+					v-btn.wordAction.delete(flat, size="x-small" icon="mdi-delete-forever-outline")
+				span this words man
 			v-btn.newEntry(flat, icon="mdi-plus-circle-outline")
 		v-divider.arrow(thickness="2", length="200")
 		v-container.words
 			v-container.wordTo
-				span TEST
+				span RoBERTa
+		v-card-actions.dictActions
+			v-btn.submitChanges(
+				size="small",
+			) Submit
+			v-btn.discardChanges(
+				size="small",
+			) Discard
 	v-btn.newEntry(flat, icon="mdi-plus-circle-outline")
 
 </template>
@@ -43,12 +50,12 @@ export default {
 	},
 	async mounted() {
 		// TODO: refactor to a separate function and reuse
-		var btns = document.getElementsByClassName("dictAction disable");
+		var btns = document.getElementsByClassName("wordAction disable");
 		for (var i = 0; i < btns.length; i++) {
 			btns[i].addEventListener("click", function () {
 				// @ts-ignore
-				var dictActions = this.parentElement;
-				var word = dictActions.parentElement;
+				var wordActions = this.parentElement;
+				var word = wordActions.parentElement;
 				if (word.classList.contains("disable")) {
 					word.classList.remove("disable");
 				} else {
