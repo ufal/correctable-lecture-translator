@@ -33,8 +33,9 @@
 }
 
 .arrow {
-	color: $love;
-	opacity: 0.75;
+	height: 1rem;
+	background-image: url("@/assets/dict-arrow.svg");
+	background-size: cover;
 }
 
 .words {

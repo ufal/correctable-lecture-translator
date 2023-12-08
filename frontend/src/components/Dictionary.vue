@@ -21,7 +21,8 @@ v-container.dict
 			v-btn.newEntry(flat, icon="mdi-plus-circle-outline")
 		v-container.divider
 			v-btn.moveEntry(flat, icon="mdi-menu-up")
-			v-divider.arrow(thickness="2")
+			//- v-divider.arrow(thickness="2")
+			.arrow
 			v-btn.moveEntry(flat, icon="mdi-menu-down")
 		v-container.words
 			v-container.wordTo
