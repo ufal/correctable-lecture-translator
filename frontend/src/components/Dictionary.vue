@@ -7,22 +7,25 @@ v-container.dict
 				.wordActions
 					v-btn.wordAction.disable(flat, size="x-small", icon="mdi-eye-off-outline")
 					v-btn.wordAction.delete(flat, size="x-small" icon="mdi-delete-forever-outline")
-				span Robert
+				.word(contenteditable="true") {{ originalText }}
 			v-container.wordFrom
 				.wordActions
 					v-btn.wordAction.disable(flat, size="x-small", icon="mdi-eye-off-outline")
 					v-btn.wordAction.delete(flat, size="x-small" icon="mdi-delete-forever-outline")
-				span Replace this many words with a single beautiful fancy word
+				.word(contenteditable="true") Replace this many words with a single beautiful fancy word
 			v-container.wordFrom
 				.wordActions
 					v-btn.wordAction.disable(flat, size="x-small", icon="mdi-eye-off-outline")
 					v-btn.wordAction.delete(flat, size="x-small" icon="mdi-delete-forever-outline")
-				span this words man
+				.word(contenteditable="true") this words man
 			v-btn.newEntry(flat, icon="mdi-plus-circle-outline")
-		v-divider.arrow(thickness="2", length="200")
+		v-container.divider
+			v-btn.moveEntry(flat, icon="mdi-menu-up")
+			v-divider.arrow(thickness="2")
+			v-btn.moveEntry(flat, icon="mdi-menu-down")
 		v-container.words
 			v-container.wordTo
-				span RoBERTa
+				.word(contenteditable="true") RoBERTa
 		v-card-actions.dictActions
 			v-btn.submitChanges(
 				size="small",
@@ -48,6 +51,12 @@ export default {
 			required: true,
 		},
 	},
+	data() {
+		return {
+			originalText: "Robert" as string,
+		};
+	},
+
 	async mounted() {
 		// TODO: refactor to a separate function and reuse
 		var btns = document.getElementsByClassName("wordAction disable");

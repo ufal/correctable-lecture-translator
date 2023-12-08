@@ -19,11 +19,22 @@
 	margin: 1rem;
 }
 
+.divider {
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
+}
+
+.moveEntry {
+	background: none;
+	margin: auto;
+	margin-top: 0.5rem;
+	margin-bottom: 0.5rem;
+}
+
 .arrow {
 	color: $love;
 	opacity: 0.75;
-	margin: 0.75rem 1rem 0 1rem;
-	margin: auto;
 }
 
 .words {
@@ -35,7 +46,7 @@
 }
 
 .wordFrom {
-	// width: 100%;
+	display: flex;
 	text-align: center;
 	border-radius: 0.75rem;
 	margin: 0.5rem 1rem 0.5rem 1rem;
@@ -43,42 +54,51 @@
 	border: solid 2px $love;
 	max-width: 26rem !important;
 	word-wrap: break-word;
+	padding: 0;
 }
 
-.wordFrom.disable{
+.wordFrom.disable {
 	background: rgba($iris-low, 0.75);
 	border: solid 2px $overlay-low;
 }
 
-.wordFrom.disable > span{
+.wordFrom.disable > span {
 	background: none;
 	opacity: 0.5;
 }
 
 .wordTo {
 	width: 100%;
-	text-align: center;
 	margin: auto;
 	background: $overlay-low;
 	border-radius: 0.75rem;
 	background: #cfdedd28;
 	border: solid 2px $foam-high;
+	padding: 0;
+}
+
+.word {
+	&:focus {
+		outline: none;
+	}
+	padding: 1rem;
+	position: relative;
+	margin: auto;
+	text-align: center
 }
 
 .wordActions {
-	background: $overlay-low;
 	display: flex;
-	flex-wrap: wrap;
+	flex-direction: column;
 	justify-content: center;
 	position: relative;
-	height: 0;
-	left: -3.25rem;
-	top: -1.25rem;
-	width: 2rem;
+	width: 0;
+	right: 1rem;
 }
 
 .wordAction {
 	background: none;
+	height: 0;
 }
 
 .wordAction.disable {
@@ -90,13 +110,14 @@
 }
 
 .dictActions {
-	margin-left: -8.25rem;
-    height: 197%;
-    padding: 0rem;
+	margin-left: -9.5rem;
+	height: 197%;
+	padding: 0rem;
 }
 
 .newEntry {
-	margin:auto;
+	margin: auto;
+	width: 100%;
 	background: none;
 	color: $love !important;
 	opacity: 0.35;
