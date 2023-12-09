@@ -12,10 +12,10 @@ $textViewerHeight: 88vh;
 .translation {
 	overflow-y: auto;
 	max-height: calc($textViewerHeight - 8vh) !important;
-	color: $text !important;
-	text-align: justify;
-	line-height: 1.2;
+	color: $black !important;
 	padding: 1rem;
+	font-family: 'Roboto Slab', serif;
+	font-weight: 400;
 }
 
 @media screen and (max-width: 600px) {

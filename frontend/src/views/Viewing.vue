@@ -2,10 +2,8 @@
 
 v-app-bar#appBar(:elevation="0")
 	template(v-slot:prepend)
-		//- img(src="@/assets/logo.png")
-		v-btn.toggleEditor(
+		v-btn.logo(
 			icon="mdi-translate",
-			@click="editorMode = !editorMode"
 		)
 		.title Coletra
 		v-divider.logoSpacer(vertical, inset, thickness="2", length="40")
@@ -23,14 +21,13 @@ v-app-bar#appBar(:elevation="0")
 
 v-container.editor(v-if="editorMode")
 	dictionary(:client="client")
+	v-divider(:thickness="3").bigDivider
 	text-editor(:client="client", :textChunks="textChunks")
-	br
-	text-viewer.editing-viewer(
-		:client="client",
-		:textChunks="textChunks"
-	)
 
 v-container.viewer(v-else)
+	.viewingMode
+		v-btn.viewingModeBtn.active(icon="mdi-projector" size="large")
+		v-btn.viewingModeBtn(icon="mdi-file-eye-outline" size="large")
 	text-viewer.viewing-viewer(:client="client", :textChunks="textChunks")
 
 </template>
@@ -53,7 +50,8 @@ export default {
 			updateIntervalId: 0,
 			toggleUpdatesIcon: "mdi-play",
 			editorMode: true,
-			toggleUpdatesColor: "#575279",
+			toggleUpdatesColor: "#5b3e87",
+			viewingMode: "normal",
 		};
 	},
 
@@ -94,7 +92,7 @@ export default {
 				window.clearInterval(this.updateIntervalId);
 				this.updateIntervalId = 0;
 				this.toggleUpdatesIcon = "mdi-play";
-				this.toggleUpdatesColor = "#286983";
+				this.toggleUpdatesColor = "#5b3e87";
 				console.info("Stopped updating text.");
 			}
 		},

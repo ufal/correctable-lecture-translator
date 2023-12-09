@@ -1,6 +1,6 @@
 <template lang="pug">
 v-container.textEditorContainer
-	.subTitle Text editor
+	.subTitle Text Editor
 	v-container.textEditor
 		edit-text-chunk(
 			v-for="chunk in textChunks",

@@ -24,7 +24,7 @@ export default {
 	},
 	computed: {
 		getFinalText() {
-			const colorGradient = ["#797593", "#9893a5"];
+			const colorGradient = ["#005454", "#00887a"];
 			let finalText = this.textChunks
 				.slice(0, -colorGradient.length)
 				.map(({ text }) => text)
@@ -34,10 +34,7 @@ export default {
 				finalText += "<span style='color: " + colorGradient[i] + "'>";
 				this.textChunks.at(-2 + i) == null
 					? (finalText += "")
-					: (finalText +=
-							" " +
-							this.textChunks.at(-colorGradient.length + i)
-								?.text);
+					: (finalText += " " + this.textChunks.at(-colorGradient.length + i)?.text);
 				finalText += "</span>";
 			}
 			return finalText;

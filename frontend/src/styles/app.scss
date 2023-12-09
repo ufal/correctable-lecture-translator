@@ -1,7 +1,7 @@
 @import "theme";
 
 .v-application {
-	background-color: $base !important;
+	background-color: $surface !important;
 	color: $love !important;
 	font-family:
 		ui-sans-serif,
@@ -24,7 +24,7 @@
 }
 
 .v-toolbar {
-	background: $base !important;
+	background: $surface !important;
 }
 
 ::-webkit-scrollbar {

@@ -1,7 +1,7 @@
 @import "theme";
 
 .dict {
-	background: $surface;
+	// border: solid 2px $light-blue;
 	margin-top: 70px;
 	border-radius: 0.75rem;
 	padding: 1.5rem;
@@ -23,20 +23,21 @@
 	display: flex;
 	justify-content: center;
 	flex-direction: column;
+	width: 15rem;
 }
 
 .moveEntry {
 	background: none;
 	margin: auto;
-	margin-top: 0.5rem;
-	margin-bottom: 0.5rem;
+	margin-top: 6rem;
+	margin-bottom: 6rem;
+	color: $green !important;
 }
 
 .arrow {
+	display: flex;
+	justify-content: center;
 	height: 1rem;
-	background-image: url("@/assets/dict-arrow.svg");
-	background-size: cover;
-	background-position: center;
 }
 
 .words {
@@ -45,48 +46,48 @@
 	flex-wrap: wrap;
 	padding: 0;
 	margin-left: 0.5rem;
+	font-family: 'Roboto Slab', serif;
+	font-weight: 400;
 }
 
 .wordFrom {
+	color: $black;
 	display: flex;
 	text-align: center;
 	border-radius: 0.75rem;
 	margin: 0.5rem 1rem 0.5rem 1rem;
-	background: $iris-low;
-	border: solid 2px $love;
-	max-width: 26rem !important;
+	background: rgba($purple, 0.15);
+	// border: solid 2px $purple;
 	word-wrap: break-word;
 	padding: 0;
 }
 
 .wordFrom.disable {
 	background: rgba($iris-low, 0.75);
-	border: solid 2px $overlay-low;
 }
 
 .wordFrom.disable > span {
-	background: none;
 	opacity: 0.5;
 }
 
 .wordTo {
+	color: $black;
 	width: 100%;
 	margin: auto;
 	background: $overlay-low;
 	border-radius: 0.75rem;
-	background: #cfdedd28;
-	border: solid 2px $foam-high;
-	padding: 0;
+	background: rgba($green, 0.15);
+	padding: 1.5rem;
+	word-break: break-all;
 }
 
 .word {
 	&:focus {
 		outline: none;
 	}
-	padding: 1rem;
 	position: relative;
 	margin: auto;
-	text-align: center
+	text-align: center;
 }
 
 .wordActions {
@@ -94,34 +95,68 @@
 	flex-direction: column;
 	justify-content: center;
 	position: relative;
-	width: 0;
 	right: 1rem;
 }
 
 .wordAction {
-	background: none;
 	height: 0;
+	margin-top: 0.2rem;
+	margin-bottom: 0.2rem;
+	background: $light-purple;
+	border-top-left-radius: 20rem;
+	border-bottom-left-radius: 20rem;
+	right: 0.5rem;
+	transition: all ease-in-out 0.1s;
 }
 
 .wordAction.disable {
-	color: $love;
+	color: $dark-purple;
 }
 
 .wordAction.delete {
-	color: $rose;
+	color: $dark-purple;
+}
+
+.wordAction:hover {
+	right: 1rem;
 }
 
 .dictActions {
-	margin-left: -9.5rem;
-	height: 197%;
-	padding: 0rem;
+	margin-left: -10.5rem;
+	height: 187%;
+	right: 20%;
+	position: relative;
 }
 
 .newEntry {
 	margin: auto;
 	width: 100%;
 	background: none;
-	color: $love !important;
 	opacity: 0.35;
 	font-size: 1.5rem;
+}
+
+.words > .newEntry {
+	color: $purple !important;
+}
+
+.dict > .newEntry {
+	color: $green !important;
+}
+
+.moveWordContainer {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.moveWord {
+	background: none;
+	color: $purple !important;
+}
+
+.moveEntries {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
 }

@@ -9,9 +9,10 @@
 }
 
 .editTextChunk {
-	color: $love;
+	color: $black;
 	font-size: 1rem;
-	line-height: 1.2;
+	font-family: 'Roboto Slab', serif;
+	font-weight: 400;
 	padding: 1.25rem;
 	&:focus {
 		outline: none;
@@ -21,18 +22,21 @@
 .actions {
 	min-height: 0;
 	height: 2rem;
+	color: $white !important;
 }
 
 .submitChanges {
 	margin: -2rem 0 -1rem 0.5rem;
-	color: $surface !important;
-	background: $pine;
+	color: $green !important;
+	font-size: 1rem !important;
+	opacity: 0.8;
 }
 
 .discardChanges {
 	margin: -2rem 0 -1rem 0;
-	color: $surface !important;
-	background: $rose;
+	color: $red !important;
+	opacity: 0.8;
+	font-size: 1rem !important;
 }
 
 .feedback {
@@ -45,13 +49,15 @@
 }
 
 .like {
-	color: $pine !important;
+	color: $green !important;
 	margin: 0 !important;
+	opacity: 0.8;
 }
 
 .dislike {
-	color: $rose !important;
+	color: $red !important;
 	margin: 0 !important;
+	opacity: 0.8;
 }
 
 @media screen and (max-width: 600px) {

@@ -11,13 +11,17 @@
 	box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px !important;
 }
 
+.logo {
+	color: $green;
+}
+
 .menuBtn {
 	color: $text;
 	padding: 0.75rem;
 	border-radius: 0.75rem;
 	margin-left: 1rem;
-	border: solid 2px $base;
 	cursor: pointer;
+	color: $dark-purple;
 }
 
 .menuBtn:hover {
@@ -35,7 +39,7 @@
 .title {
 	margin-left: 0.5rem;
 	margin-top: 0.5rem;
-	color: $rose;
+	color: $green;
 	font-size: 2.5rem;
 	font-weight: 700;
 	z-index: 9999;
@@ -47,7 +51,7 @@
 	margin-left: 1rem;
 	margin-right: 0.5rem;
 	margin-top: 0.75rem !important;
-	color: $love;
+	color: $dark-purple;
 	opacity: 1;
 }
 
@@ -60,18 +64,19 @@
 	margin-left: 3rem;
 	z-index: 9999;
 }
+
 #selectSession {
 	width: 15.5rem;
 	height: 3rem;
-	background: $surface;
-	color: $text;
+	background: $overlay-low;
+	color: $black;
 	border-radius: 0.75rem;
 	font-size: 0.915rem;
 	line-height: 1.25rem;
 }
 
 .v-field {
-	color: $love !important;
+	color: $gray !important;
 	border-radius: 0.75rem !important;
 }
 
@@ -83,20 +88,38 @@
 	opacity: 1 !important;
 }
 
-input:focus {
-	color: $love !important;
-}
-
 .toggleUpdates {
-	color: $love;
+	color: $dark-purple;
 }
 
 .subTitle {
 	width: 100%;
 	font-family: "Josefin Sans", sans-serif !important;
 	font-weight: 700 !important;
-	color: $text !important;
-	font-size: 2rem;
+	color: $dark-purple !important;
+	font-size: 1.75rem;
+	text-align: center;
+}
+
+.viewingMode {
+	margin-top: 64px;
+	height: 0;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+}
+
+.viewingModeBtn {
+	margin-left: 2rem;
+	margin-right: 2rem;
+	background: none;
+	box-shadow: none;
+	border: solid 2px $love;
+}
+
+.viewingModeBtn.active {
+	background: $love;
+	color: $surface;
 }
 
 .editing-viewer > .translation {
@@ -113,6 +136,11 @@ input:focus {
 
 .viewing-viewer > .subTitle {
 	display: none;
+}
+
+.bigDivider {
+	color: $purple;
+	width: 100%;
 }
 
 @media screen and (max-width: 600px) {
