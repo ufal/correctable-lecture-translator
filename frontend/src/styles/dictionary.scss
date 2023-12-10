@@ -208,3 +208,19 @@
 		font-size: 0.75rem;
 	}
 }
+
+
+@media screen and (max-width: 600px) {
+	.entry {
+		width: 90vw;
+	}
+
+	.dictActions {
+		top:6%;
+		right: 4%;
+	}
+
+	.dict {
+		font-size: 0.75rem;
+	}
+}
