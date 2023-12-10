@@ -1,16 +1,17 @@
 import json
 import os
 import time
-from typing import Dict, List, TextIO, Tuple, Union
+from typing import Dict, List, Union
 
 from flask import Flask, Response, make_response, request
-from flask_cors import CORS
+from flask_cors import CORS # type: ignore
 
 # modules for ASR manipulation
 # from common import format_timestamp, break_line
 # from text_handlers import CurrentASRText
 # from audio_handler import AudioBuffer
-from networking_common import *
+from networking_common import Session
+from common import ASRConfig
 
 
 app = Flask(__name__)
@@ -566,7 +567,7 @@ def create_session():
         response.data = json.dumps(response_data)
         return response, 404
 
-    sessions[session_id] = Session(session_id=session_id)
+    sessions[session_id] = Session(session_id=session_id, config=CONFIG)
     response_data = {
         "success": True,
         "message": f"Successfully created session {session_id}",
@@ -623,10 +624,50 @@ def end_session():
     return response, 200
 
 
-if __name__ == "__main__":
+@app.route("/rate_text_chunk", methods=["POST"])
+def rate_text_chunk():
+    global sessions
+    request_data = request.get_json()
+    session_id = request.args.get("session_id", default=None, type=str)
+    language = request.args.get("language", default=None, type=str)
+
+    timestamp = request_data["timestamp"]
+    version = request_data["version"]
+    rating_update = request_data["rating_update"]
+
+    if session_id is None or session_id not in sessions or len(session_id) == 0:
+        return session_not_found(session_id=session_id), 404
+
+    session = sessions[session_id]
+    session.texts.current_texts[language].rate_text_chunk(timestamp, version, rating_update)
+
+    response_data = {
+        "success": True,
+        "session_id": session.session_id,
+        "language": language,
+        "timestamp": timestamp,
+        "version": version,
+        "rating_update": rating_update,
+    }
+
+    response = make_response(json.dumps(response_data))
+    response.headers["Content-Type"] = "application/json"
+    response = add_cors_headers(response)
+    return response, 200
+
+
+@app.route("/", methods=["GET"])
+def landing_page():
+    response = make_response("I work uwu")
+    response.headers["Content-Type"] = "text/plain"
+    response = add_cors_headers(response)
+    return response, 200
+
+
+def main() -> None:
     try:
-        servercert: str | None = os.environ["SERVERCERT"]
-        serverkey: str | None = os.environ["SERVERKEY"]
+        servercert: Union[str, None] = os.environ["SERVERCERT"]
+        serverkey: Union[str, None] = os.environ["SERVERKEY"]
     except KeyError:
         servercert = None
         serverkey = None
@@ -639,3 +680,7 @@ if __name__ == "__main__":
             host="slt.ufal.mff.cuni.cz",
             ssl_context=(servercert, serverkey),
         )
+
+
+if __name__ == "__main__":
+    main()

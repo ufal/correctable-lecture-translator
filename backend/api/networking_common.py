@@ -1,6 +1,7 @@
-from common import *
+from common import ASRConfig, format_timestamp
 from audio_handler import AudioBuffer
-from text_handlers import CurrentASRText
+from text_handlers import CurrentASRTextContainer, break_line
+from typing import Dict, List, TextIO, Union, Set
 import json
 import time
 import re
@@ -12,18 +13,20 @@ class Session:
         self.session_id: str = session_id
         self.source_language: str = "Czech"  # default audio language
         # TODO: change this to list of languages
-        self.transcript_language: str = "English"  # default transcript language
+        self.transcript_language: str = "Czech"  # default transcript language
         self.buffer: AudioBuffer = AudioBuffer(
             SNIPPET_SIZE=config.AUDIO_SNIPPET_SIZE,
             SHIFT_LENGTH=config.SHIFT_SIZE,
         )
         self.last_chunk_time: float = time.time()
         self.save_path: str = self.get_save_folder()
-        self.text: CurrentASRText = CurrentASRText(self.save_path + "/text_chunks")
+        self.texts: CurrentASRTextContainer = CurrentASRTextContainer(
+            self.save_path + "/text_chunks", config.supported_languages
+        )
         self.last_sent_timestamp: int = -1
-        self.unprocessed_timestamps: list[int] = [0]
+        self.unprocessed_timestamps: List[int] = [0]
         self.sent_out_for_processing: Dict[int, float] = dict()
-        self.processed_timestamps: set[int] = {-1}
+        self.processed_timestamps: Set[int] = {-1}
 
     def switch_transcript_language(self, language: str):
         self.transcript_language = language
@@ -111,14 +114,14 @@ class Session:
             print(json.dumps(chunk), file=f)
 
 
-class ProcessingDataUnit:
+class TranscriptDataUnit:
     def __init__(
         self,
         session_id: str,
         timestamp: int,
         source_language: str,
-        transcript_languages: List[str],
-        audio: list[bytes],
+        transcript_language: str,
+        audio: List[bytes],
     ) -> None:
         """
         ProcessingDataUnit is a container for audio and metadata.
@@ -132,14 +135,15 @@ class ProcessingDataUnit:
             transcript_languages (List[str]): The languages of the transcripts.
             audio (list[bytes]): The audio data as a byte string.
         """
-        self.session_id = session_id
-        self.timestamp = timestamp
-        self.source_language = source_language
-        self.transcript_languages = transcript_languages
-        self.audio = audio
-        self.sent_out_times = [0.0 for _ in transcript_languages]
-        self.transcripts: List[None | str] = [None for _ in transcript_languages]
+        self.session_id: str = session_id
+        self.timestamp: int = timestamp
+        self.source_language: str = source_language
+        self.transcript_language: str = transcript_language
+        self.audio: List[bytes] = audio
+        self.sent_out_time: float = 0.0
+        self.transcript: Union[None, str] = None
 
+    # FIXME: Transcript takes only one language as of now
     def is_completely_processed(self) -> bool:
         """
         Checks if audio has been completely transcribed.
@@ -172,3 +176,7 @@ class ProcessingDataUnit:
         Save the transcript of the audio chunk in the specified language.
         """
         self.transcripts[self.transcript_languages.index(transcript_language)] = ASR_result
+
+
+class TranslateDataUnit:
+    pass

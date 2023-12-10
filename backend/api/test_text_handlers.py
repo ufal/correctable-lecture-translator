@@ -1,4 +1,4 @@
-from text_handlers import Timespan, ASRTextUnit, CurrentASRText
+from text_handlers import ASRTextUnit, Timespan
 
 
 def test_Timespan():
@@ -20,9 +20,9 @@ def test_ASRTextUnit():
     tend = 3
     asr_text = "This is some transcribed text."
     timespan = Timespan(tstart, tend)
-    asr_text_unit = ASRTextUnit(text=asr_text, id_num=0, timespan=timespan, version=0)
+    asr_text_unit = ASRTextUnit(text=asr_text, timestamp=0, timespan=timespan, version=0)
     assert asr_text_unit.text == asr_text
-    assert asr_text_unit.id_num == 0
+    assert asr_text_unit.timestamp == 0
     assert asr_text_unit.timespan.start == tstart
     assert asr_text_unit.timespan.end == tend
     assert asr_text_unit.version == 0
@@ -35,7 +35,7 @@ def test_ASRTextUnit():
     asr_text_unit2 = asr_text_unit.from_json(json_repr)
 
     assert asr_text_unit2.text == asr_text
-    assert asr_text_unit2.id_num == 0
+    assert asr_text_unit2.timestamp == 0
     assert asr_text_unit2.timespan.start == tstart
     assert asr_text_unit2.timespan.end == tend
     assert asr_text_unit2.version == 0

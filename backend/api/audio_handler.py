@@ -1,5 +1,4 @@
-from common import *
-
+from typing import List
 
 class AudioBuffer:
     def __init__(self, SNIPPET_SIZE: int, SHIFT_LENGTH: int):
@@ -8,13 +7,13 @@ class AudioBuffer:
         self.SHIFT_LENGTH = SHIFT_LENGTH
 
         # data
-        self.buffer: list[bytes] = []
+        self.buffer: List[bytes] = []
         self.smallest_available_timestamp = 0
 
     def extend(self, chunk):
         self.buffer.extend(chunk)
 
-    def get_snippet(self, timestamp: int) -> list[bytes]:
+    def get_snippet(self, timestamp: int) -> List[bytes]:
         actuall_timestamp = timestamp - self.smallest_available_timestamp
         return self.buffer[
             actuall_timestamp * self.SHIFT_LENGTH : actuall_timestamp * self.SHIFT_LENGTH
