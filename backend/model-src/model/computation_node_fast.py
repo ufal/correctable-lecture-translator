@@ -2,27 +2,12 @@
 import json
 import sys
 import time
-from functools import lru_cache
 
-import librosa
 import numpy as np
 import requests
 import urllib3
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-
-@lru_cache
-def load_audio(fname):
-    a, _ = librosa.load(fname, sr=16000)
-    return a
-
-
-def load_audio_chunk(fname, beg, end):
-    audio = load_audio(fname)
-    beg_s = int(beg * 16000)
-    end_s = int(end * 16000)
-    return audio[beg_s:end_s]
 
 
 # Whisper backend
