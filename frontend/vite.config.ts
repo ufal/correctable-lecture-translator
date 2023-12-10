@@ -24,6 +24,7 @@ try {
 			cert: serverCert,
 		},
 	};
+	console.info("Running https server.");
 } catch (e) {
 	console.error(e);
 	console.info("Running http server without SSL.");

@@ -1,7 +1,7 @@
 <template lang="pug">
 v-container.dict
 	span.subTitle Global Phrase Replacement Rules
-	.record
+	.entry
 		v-container.words
 			v-container.wordFrom
 				.wordActions
@@ -28,7 +28,6 @@ v-container.dict
 					v-btn.moveWord(flat, size="small" icon="mdi-menu-up")
 					v-btn.moveWord(flat, size="small" icon="mdi-menu-down")
 			v-btn.newEntry(flat, icon="mdi-plus-circle-outline")
-
 		.divider
 			.arrow
 				img(src="@/assets/dict-arrow.svg")
@@ -45,7 +44,7 @@ v-container.dict
 			v-btn.discardChanges(
 				size="small",
 			) Discard
-	.record
+	.entry
 		v-container.words
 			v-container.wordFrom
 				.wordActions

@@ -2,13 +2,14 @@
 
 v-app-bar#appBar(:elevation="0")
 	template(v-slot:prepend)
-		v-btn.logo(
+		v-icon.logo(
 			icon="mdi-translate",
 		)
 		.title Coletra
 		v-divider.logoSpacer(vertical, inset, thickness="2", length="40")
-		.v-btn(@click="editorMode = false").menuBtn Viewer
-		.v-btn(@click="editorMode = true").menuBtn.active Editor
+		#menuBtnsContainer
+			.v-btn(@click="editorMode = false").menuBtn.active Viewer
+			.v-btn(@click="editorMode = true").menuBtn Editor
 	v-text-field.selectSession(
 			v-model="sessionName",
 			variant="solo",
@@ -25,9 +26,9 @@ v-container.editor(v-if="editorMode")
 	text-editor(:client="client", :textChunks="textChunks")
 
 v-container.viewer(v-else)
-	.viewingMode
-		v-btn.viewingModeBtn.active(icon="mdi-projector" size="large")
-		v-btn.viewingModeBtn(icon="mdi-file-eye-outline" size="large")
+	#viewingModeBtnsContainer
+		v-btn.viewingModeBtn.active(icon="mdi-file-eye-outline" size="large" @click="viewingMode = 'normal'")
+		v-btn.viewingModeBtn(icon="mdi-projector" size="large" @click="viewingMode = 'presentation'")
 	text-viewer.viewing-viewer(:client="client", :textChunks="textChunks")
 
 </template>
@@ -38,7 +39,6 @@ import AsrClient from "@/utils/client";
 import { TextChunk, TextChunkVersions } from "@/utils/chunk";
 import TextViewer from "@/components/TextViewer.vue";
 import TextEditor from "@/components/TextEditor.vue";
-import Dictionary from "@/components/Dictionary.vue";
 
 export default {
 	data() {
@@ -49,7 +49,7 @@ export default {
 			updateTextInterval: 1000,
 			updateIntervalId: 0,
 			toggleUpdatesIcon: "mdi-play",
-			editorMode: true,
+			editorMode: false,
 			toggleUpdatesColor: "#5b3e87",
 			viewingMode: "normal",
 		};
@@ -96,20 +96,44 @@ export default {
 				console.info("Stopped updating text.");
 			}
 		},
+		uglyHack() {
+			var fontSizes = ["1rem", "2.5rem"];
+			var translation = document.getElementsByClassName("translation")[0];
+			if (translation == undefined) return;
+			var viewingModeBtnsContainer = document.getElementById("viewingModeBtnsContainer");
+			var viewingModeBtns = viewingModeBtnsContainer!.getElementsByClassName("viewingModeBtn");
+			for (var i = 0; i < viewingModeBtns.length; i++) {
+				viewingModeBtns[i].addEventListener("click", function () {
+					var current = viewingModeBtnsContainer!.getElementsByClassName("active");
+					if (current.length > 0) {
+						current[0].className = current[0].className.replace(" active", "");
+					}
+					// @ts-ignore
+					this.className += " active";
+					// @ts-ignore
+					translation.style.fontSize = fontSizes[Array.from(viewingModeBtns).indexOf(this)];
+				});
+			}
+		},
 	},
 	async mounted() {
 		// this.textChunks = await this.client.getLatestTextChunks({});
-		var btns = document.getElementsByClassName("menuBtn");
-		for (var i = 0; i < btns.length; i++) {
-			btns[i].addEventListener("click", function () {
-				var current = document.getElementsByClassName("active");
+		var menuBtnsContainer = document.getElementById("menuBtnsContainer");
+		var menuBtns = menuBtnsContainer!.getElementsByClassName("menuBtn");
+		for (var i = 0; i < menuBtns.length; i++) {
+			var that = this;
+			menuBtns[i].addEventListener("click", function () {
+				var current = menuBtnsContainer!.getElementsByClassName("active");
 				if (current.length > 0) {
 					current[0].className = current[0].className.replace(" active", "");
 				}
 				// @ts-ignore
 				this.className += " active";
+				that.uglyHack();
 			});
 		}
+
+		this.uglyHack();
 
 		document.onscroll = () => {
 			let appBar = document.getElementById("appBar");
