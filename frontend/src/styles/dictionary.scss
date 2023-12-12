@@ -1,7 +1,6 @@
 @import "theme";
 
 .dict {
-	// border: solid 2px $light-blue;
 	margin-top: 70px;
 	border-radius: 0.75rem;
 	padding: 1.5rem;
@@ -13,24 +12,28 @@
 .entry {
 	width: 100%;
 	display: flex;
+	flex-wrap: wrap;
 	background: $overlay-low;
 	border-radius: 0.75rem;
 	padding: 1rem;
 	margin: 1rem;
 }
 
+.dictActions > * {
+	margin: 0;
+}
+
 .divider {
 	display: flex;
 	justify-content: center;
 	flex-direction: column;
-	width: 15rem;
+	margin: 0.75rem;
 }
 
 .moveEntry {
 	background: none;
 	margin: auto;
-	margin-top: 6rem;
-	margin-bottom: 6rem;
+	height: 1.75rem !important;
 	color: $green !important;
 }
 
@@ -42,12 +45,12 @@
 
 .words {
 	display: flex;
+	flex-direction: column;
 	justify-content: center;
-	flex-wrap: wrap;
 	padding: 0;
-	margin-left: 0.5rem;
 	font-family: "Roboto Slab", serif;
 	font-weight: 400;
+	flex: 1;
 }
 
 .wordFrom {
@@ -55,10 +58,8 @@
 	display: flex;
 	text-align: center;
 	border-radius: 0.75rem;
-	margin: 0.5rem 1rem 0.5rem 1rem;
+	margin: 0.5rem 1rem 0.5rem 0rem;
 	background: rgba($purple, 0.15);
-	// border: solid 2px $purple;
-	word-wrap: break-word;
 	padding: 0;
 	white-space: break-spaces;
 }
@@ -91,25 +92,20 @@
 	position: relative;
 	margin: auto;
 	text-align: center;
+	text-wrap: balance;
+	word-break: break-word;
+	padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
 }
 
 .wordActions {
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	position: relative;
-	right: 1rem;
+	margin:auto;
+	margin-right: 0;
+	margin-left: 0.25rem;
 }
 
 .wordAction {
-	height: 0;
-	margin-top: 0.2rem;
-	margin-bottom: 0.2rem;
-	background: $light-purple;
-	border-top-left-radius: 20rem;
-	border-bottom-left-radius: 20rem;
-	right: 0.5rem;
-	transition: all ease-in-out 0.1s;
+	background: none;
 }
 
 .wordAction.disable {
@@ -120,15 +116,32 @@
 	color: $dark-purple;
 }
 
-.wordAction:hover {
-	right: 1rem;
+.dictActions {
+	flex: 100%;
+	margin-top: 0.5rem;
+	animation: ease-in 1s linear;
+
 }
 
-.dictActions {
-	margin-left: -10.5rem;
-	height: 187%;
-	right: 20%;
-	position: relative;
+
+@keyframes FadeIn {
+	0% {
+	  opacity: 0;
+	  transform: scale(.1);
+	}
+
+	85% {
+	  opacity: 1;
+	  transform: scale(1.05);
+	}
+	100% {
+	  transform: scale(1);
+	}
+  }
+
+.dictActions > * {
+	animation: FadeIn 0.2s linear;
+	animation-fill-mode: both;
 }
 
 .newEntry {
@@ -148,20 +161,26 @@
 }
 
 .moveWordContainer {
+	place-content: flex-end;
 	display: flex;
-	flex-direction: column;
-	justify-content: center;
+    flex-wrap: wrap;
+	margin: auto;
+    margin-left: 0;
+    margin-right: 0.25rem;
+    width: 4rem;
 }
 
 .moveWord {
 	background: none;
+	font-size: 1rem;
 	color: $purple !important;
 }
 
-.moveEntries {
+.moveEntryContainer {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
+	width: 1.75rem;
 }
 
 @media screen and (max-width: 600px) {

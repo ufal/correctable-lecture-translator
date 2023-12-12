@@ -3,23 +3,23 @@
     v-container.words
         v-container.wordFrom(v-for="(SourceString, SourceStringIndex) in dictEntry.source_strings", :class="SourceString.active")
             .wordActions
-                v-btn.wordAction.disable(flat, size="x-small", icon="mdi-eye-off-outline", @click="toggleWord(SourceStringIndex)")
+                v-btn.wordAction.disable(flat, size="x-small", icon="mdi-eye-off-outline", @click="toggleWord($event, SourceStringIndex)")
                 v-btn.wordAction.delete(flat, size="x-small", icon="mdi-trash-can-outline", @click="deleteWord(SourceStringIndex)")
-            .word(contenteditable="true" @input="editWordFrom(SourceStringIndex)") {{ SourceString.string }}
+            .word(contenteditable="true" @input="editWordFrom($event, SourceStringIndex)") {{ SourceString.string }}
             .moveWordContainer
-                v-btn.moveWord.up(flat, size="small", icon="mdi-menu-up", @click="moveWordUp(SourceStringIndex)")
-                v-btn.moveWord.down(flat, size="small" icon="mdi-menu-down" @click="moveWordDown(SourceStringIndex)")
-        v-btn.newEntry(flat, icon="mdi-plus-circle-outline" @click="addWord")
+                v-btn.moveWord.up(flat, size="x-small", icon="mdi-menu-up", @click="moveWordUp(SourceStringIndex)")
+                v-btn.moveWord.down(flat, size="x-small" icon="mdi-menu-down" @click="moveWordDown(SourceStringIndex)")
+        v-btn.newEntry(flat, size="x-small", icon="mdi-plus-circle-outline" @click="addWord")
     .divider
         .arrow
             img(src="@/assets/dict-arrow.svg")
     v-container.words
         v-container.wordTo
             .word(contenteditable="true" @input="editWordTo") {{ dictEntry.to }}
-    .moveEntries
+    .moveEntryContainer
         v-btn.moveEntry.up(flat, icon="mdi-menu-up", @click="moveEntryUp")
         v-btn.moveEntry.down(flat, icon="mdi-menu-down", @click="moveEntryDown")
-    v-card-actions.dictActions(v-if="dictEntry.locked")
+    .dictActions(v-if="dictEntry.locked")
         v-btn.submitChanges(
             size="small",
             @click="submitChanges"
@@ -76,10 +76,9 @@ export default {
 			}
 			this.dictEntry.locked = this.checkForChanges();
 		},
-		editWordFrom(index: number) {
+		editWordFrom(e: Event, index: number) {
 			// @ts-ignore
-			var words = this.$refs.entry.getElementsByClassName("word");
-			this.dictEntry.source_strings[index].string = words[index].innerHTML;
+			this.dictEntry.source_strings[index].string = e.target.innerHTML;
 			this.dictEntry.locked = this.checkForChanges();
 		},
 		editWordTo(e: Event) {
@@ -87,8 +86,10 @@ export default {
 			this.dictEntry.to = e.target.innerHTML;
 			this.dictEntry.locked = this.checkForChanges();
 		},
-		toggleWord(index: number) {
+		toggleWord(e: Event, index: number) {
 			this.dictEntry.source_strings[index].active = !this.dictEntry.source_strings[index].active;
+            // @ts-ignore
+            e.target.classList.toggle("active");
 			this.dictEntry.locked = this.checkForChanges();
 		},
 		deleteWord(index: number) {
@@ -97,7 +98,7 @@ export default {
 		},
 		addWord() {
 			this.dictEntry.source_strings.push({
-				string: "",
+				string: "TEXT_TO_REPLACE",
 				active: true,
 			});
 			this.dictEntry.locked = this.checkForChanges();
@@ -140,7 +141,6 @@ export default {
 			this.dictEntry.locked = false;
 		},
 	},
-	mounted() {
-	},
+	mounted() {},
 };
 </script>
