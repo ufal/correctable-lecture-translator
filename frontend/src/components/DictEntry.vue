@@ -163,8 +163,6 @@ export default {
 		},
 	},
 	mounted() {
-		this.addToggleActiveListeners();
-		this.addDeleteWordListeners();
 	},
 };
 </script>
