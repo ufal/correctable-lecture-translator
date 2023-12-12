@@ -1,11 +1,7 @@
 <template lang="pug">
 v-container.dict
 	span.subTitle Global Phrase Replacement Rules
-<<<<<<< HEAD
 	dict-entry(:dictEntry="dictEntry")
-=======
-
->>>>>>> d57b558f4a4a633ac26c6482d75fb3dadd893c01
 	v-btn.newEntry(flat, icon="mdi-plus-circle-outline")
 
 </template>
@@ -14,12 +10,8 @@ v-container.dict
 import type { PropType } from "vue";
 import "@/styles/dictionary.scss";
 import AsrClient from "@/utils/client";
-<<<<<<< HEAD
 import DictEntry from "@/components/DictEntry.vue";
 import { DictType, DictEntryType } from "@/utils/dict";
-=======
-import { Dict } from "@/utils/dict";
->>>>>>> d57b558f4a4a633ac26c6482d75fb3dadd893c01
 
 export default {
 	name: "dictionary",
@@ -31,7 +23,6 @@ export default {
 	},
 	data() {
 		return {
-<<<<<<< HEAD
 			localDict: [] as DictEntryType[],
 			serverDict: [] as DictEntryType[],
 			dictEntry: {
@@ -57,15 +48,6 @@ export default {
 	async mounted() {
 		// this.localDict = await this.client.getDict();
 		// this.serverDict = await this.client.getDict();
-=======
-			localDict: [] as Dict[],
-			serverDict: [] as Dict[],
-		};
-	},
-	async mounted() {
-		this.localDict = await this.client.getDict();
-		this.serverDict = await this.client.getDict();
->>>>>>> d57b558f4a4a633ac26c6482d75fb3dadd893c01
 
 		// TODO: refactor to a separate function and reuse
 		var btns = document.getElementsByClassName("wordAction disable");

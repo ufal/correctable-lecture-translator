@@ -46,7 +46,7 @@
 	flex-wrap: wrap;
 	padding: 0;
 	margin-left: 0.5rem;
-	font-family: 'Roboto Slab', serif;
+	font-family: "Roboto Slab", serif;
 	font-weight: 400;
 }
 
@@ -60,6 +60,7 @@
 	// border: solid 2px $purple;
 	word-wrap: break-word;
 	padding: 0;
+	white-space: break-spaces;
 }
 
 .wordFrom.disable {
@@ -80,6 +81,7 @@
 	padding: 1.5rem;
 	word-break: break-all;
 	z-index: 999;
+	white-space: break-spaces;
 }
 
 .word {
@@ -162,14 +164,13 @@
 	justify-content: center;
 }
 
-
 @media screen and (max-width: 600px) {
 	.entry {
 		width: 90vw;
 	}
 
 	.dictActions {
-		top:6%;
+		top: 6%;
 		right: 4%;
 	}
 

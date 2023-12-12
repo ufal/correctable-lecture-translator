@@ -50,28 +50,6 @@ export default {
 		};
 	},
 	methods: {
-		addToggleActiveListeners() {
-			var component = this;
-			// @ts-ignore
-			var btns = component.$refs.entry.getElementsByClassName("wordAction disable");
-			for (var i = 0; i < btns.length; i++) {
-				btns[i].addEventListener("click", function () {
-					component.dictEntry.source_strings[i].active = !component.dictEntry.source_strings[i].active;
-					component.dictEntry.locked = component.checkForChanges();
-				});
-			}
-		},
-		addDeleteWordListeners() {
-			var component = this;
-			// @ts-ignore
-			var btns = this.$refs.entry.getElementsByClassName("wordAction delete");
-			for (var i = 0; i < btns.length; i++) {
-				btns[i].addEventListener("click", function () {
-					component.dictEntry.source_strings.splice(i, 1);
-					component.dictEntry.locked = component.checkForChanges();
-				});
-			}
-		},
 		moveWordUp(index: number) {
 			if (index - 1 < 0) {
 				// index is 0, add element to the end and remove it from start

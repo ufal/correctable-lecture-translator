@@ -15,6 +15,7 @@
 	font-weight: 400;
 	text-wrap: wrap;
 	padding: 1.25rem;
+	z-index: 999;
 	&:focus {
 		outline: none;
 	}
