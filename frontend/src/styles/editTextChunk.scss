@@ -13,6 +13,7 @@
 	font-size: 1rem;
 	font-family: 'Roboto Slab', serif;
 	font-weight: 400;
+	text-wrap: wrap;
 	padding: 1.25rem;
 	&:focus {
 		outline: none;
@@ -30,6 +31,8 @@
 	color: $green !important;
 	font-size: 1rem !important;
 	opacity: 0.8;
+	background: none !important;
+	box-shadow: none !important;
 }
 
 .discardChanges {
@@ -37,31 +40,42 @@
 	color: $red !important;
 	opacity: 0.8;
 	font-size: 1rem !important;
+	background: none !important;
+	box-shadow: none !important;
 }
 
 .feedback {
-	width: 7rem !important;
-	padding: 0 !important;
-	padding-left: 2rem !important;
-	margin-right: 0 !important;
-	margin-top: -2.75rem;
-	margin-bottom: -1.75rem;
+	margin:auto;
+	margin-right: 1rem;
+	display: flex;
+}
+
+.textFeedback {
+	display: flex;
+	justify-content: space-between;
 }
 
 .like {
 	color: $green !important;
 	margin: 0 !important;
+	background: none !important;
 	opacity: 0.8;
+	box-shadow: none !important;
 }
 
 .dislike {
 	color: $red !important;
 	margin: 0 !important;
+	background: none !important;
 	opacity: 0.8;
+	box-shadow: none !important;
 }
 
 @media screen and (max-width: 600px) {
 	.editTextChunk {
 		padding: 1rem;
+	}
+	.feedback {
+		flex-direction: column;
 	}
 }

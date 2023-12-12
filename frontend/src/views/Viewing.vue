@@ -49,7 +49,7 @@ export default {
 			updateTextInterval: 1000,
 			updateIntervalId: 0,
 			toggleUpdatesIcon: "mdi-play",
-			editorMode: false,
+			editorMode: true,
 			toggleUpdatesColor: "#5b3e87",
 			viewingMode: "normal",
 		};

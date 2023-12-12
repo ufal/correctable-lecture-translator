@@ -1,104 +1,20 @@
 <template lang="pug">
 v-container.dict
 	span.subTitle Global Phrase Replacement Rules
-	.entry
-		v-container.words
-			v-container.wordFrom
-				.wordActions
-					v-btn.wordAction.disable(flat, size="x-small", icon="mdi-eye-off-outline")
-					v-btn.wordAction.delete(flat, size="x-small" icon="mdi-trash-can-outline")
-				.word(contenteditable="true") {{ originalText }}
-				.moveWordContainer
-					v-btn.moveWord(flat, size="small" icon="mdi-menu-up")
-					v-btn.moveWord(flat, size="small" icon="mdi-menu-down")
-			v-container.wordFrom
-				.wordActions
-					v-btn.wordAction.disable(flat, size="x-small", icon="mdi-eye-off-outline")
-					v-btn.wordAction.delete(flat, size="x-small" icon="mdi-trash-can-outline")
-				.word(contenteditable="true") Replace this many words with a single beautiful fancy word
-				.moveWordContainer
-					v-btn.moveWord(flat, size="small" icon="mdi-menu-up")
-					v-btn.moveWord(flat, size="small" icon="mdi-menu-down")
-			v-container.wordFrom
-				.wordActions
-					v-btn.wordAction.disable(flat, size="x-small", icon="mdi-eye-off-outline")
-					v-btn.wordAction.delete(flat, size="x-small" icon="mdi-trash-can-outline")
-				.word(contenteditable="true") this words man
-				.moveWordContainer
-					v-btn.moveWord(flat, size="small" icon="mdi-menu-up")
-					v-btn.moveWord(flat, size="small" icon="mdi-menu-down")
-			v-btn.newEntry(flat, icon="mdi-plus-circle-outline")
-		.divider
-			.arrow
-				img(src="@/assets/dict-arrow.svg")
-		v-container.words
-			v-container.wordTo
-				.word(contenteditable="true") RoBERTa
-		.moveEntries
-			v-btn.moveEntry(flat, icon="mdi-menu-up")
-			v-btn.moveEntry(flat, icon="mdi-menu-down")
-		v-card-actions.dictActions
-			v-btn.submitChanges(
-				size="small",
-			) Submit
-			v-btn.discardChanges(
-				size="small",
-			) Discard
-	.entry
-		v-container.words
-			v-container.wordFrom
-				.wordActions
-					v-btn.wordAction.disable(flat, size="x-small", icon="mdi-eye-off-outline")
-					v-btn.wordAction.delete(flat, size="x-small" icon="mdi-trash-can-outline")
-				.word(contenteditable="true") {{ originalText }}
-				.moveWordContainer
-					v-btn.moveWord(flat, size="small" icon="mdi-menu-up")
-					v-btn.moveWord(flat, size="small" icon="mdi-menu-down")
-			v-container.wordFrom
-				.wordActions
-					v-btn.wordAction.disable(flat, size="x-small", icon="mdi-eye-off-outline")
-					v-btn.wordAction.delete(flat, size="x-small" icon="mdi-trash-can-outline")
-				.word(contenteditable="true") Replace this many words with a single beautiful fancy word
-				.moveWordContainer
-					v-btn.moveWord(flat, size="small" icon="mdi-menu-up")
-					v-btn.moveWord(flat, size="small" icon="mdi-menu-down")
-			v-container.wordFrom
-				.wordActions
-					v-btn.wordAction.disable(flat, size="x-small", icon="mdi-eye-off-outline")
-					v-btn.wordAction.delete(flat, size="x-small" icon="mdi-trash-can-outline")
-				.word(contenteditable="true") this words man
-				.moveWordContainer
-					v-btn.moveWord(flat, size="small" icon="mdi-menu-up")
-					v-btn.moveWord(flat, size="small" icon="mdi-menu-down")
-			v-btn.newEntry(flat, icon="mdi-plus-circle-outline")
-		.divider
-			.arrow
-				img(src="@/assets/dict-arrow.svg")
-		v-container.words
-			v-container.wordTo
-				.word(contenteditable="true") Mrkvicka
-		.moveEntries
-			v-btn.moveEntry(flat, icon="mdi-menu-up")
-			v-btn.moveEntry(flat, icon="mdi-menu-down")
-		v-card-actions.dictActions
-			v-btn.submitChanges(
-				size="small",
-			) Submit
-			v-btn.discardChanges(
-				size="small",
-			) Discard
+	dict-entry(:dictEntry="dictEntry")
 	v-btn.newEntry(flat, icon="mdi-plus-circle-outline")
 
 </template>
-<!-- img.line(src="@/assets/dict-line.png") -->
 
 <script lang="ts">
 import type { PropType } from "vue";
 import "@/styles/dictionary.scss";
 import AsrClient from "@/utils/client";
+import DictEntry from "@/components/DictEntry.vue";
+import { DictType, DictEntryType } from "@/utils/dict";
 
 export default {
-	name: "global-dictionary",
+	name: "dictionary",
 	props: {
 		client: {
 			type: Object as PropType<AsrClient>,
@@ -107,11 +23,32 @@ export default {
 	},
 	data() {
 		return {
-			originalText: "Robert" as string,
+			localDict: [] as DictEntryType[],
+			serverDict: [] as DictEntryType[],
+			dictEntry: {
+				to: "TEST_TO",
+				source_strings: [
+					{
+						string: "TEST_FROM_1",
+						active: true,
+					},
+					{
+						string: "TEST_FROM_2",
+						active: true,
+					},{
+						string: "TEST_FROM_3",
+						active: true,
+					},
+				],
+				active: true,
+				locked: false,
+			} as DictEntryType,
 		};
 	},
-
 	async mounted() {
+		// this.localDict = await this.client.getDict();
+		// this.serverDict = await this.client.getDict();
+
 		// TODO: refactor to a separate function and reuse
 		var btns = document.getElementsByClassName("wordAction disable");
 		for (var i = 0; i < btns.length; i++) {
