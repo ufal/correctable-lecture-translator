@@ -1,25 +1,14 @@
 <template lang="pug">
-v-card.container
-	.editTextChunk(
-		contenteditable="true",
-		@input="onInput",
-		@focus="highlightFocused",
-		@blur="unhighlightFocused",
-		v-html="originalText"
-	)
-	v-card-actions.actions
-		v-btn.submitChanges(
-			v-if="showSubmit",
-			size="small",
-			@click="submitTextChunk"
-		) Submit
-		v-btn.discardChanges(
-			v-if="showSubmit",
-			size="small",
-			@click="discardChanges"
-		) Discard
-
-		v-container.feedback
+.container
+	.textFeedback
+		.editTextChunk(
+			contenteditable="true",
+			@input="onInput",
+			@focus="highlightFocused",
+			@blur="unhighlightFocused",
+			v-html="originalText"
+		)
+		.feedback
 			v-btn.like(
 				size="small",
 				:icon="likeIcon",
@@ -30,6 +19,17 @@ v-card.container
 				:icon="dislikeIcon",
 				@click="dislikeTextChunk"
 			)
+	.actions(v-if="showSubmit")
+		v-btn.submitChanges(
+			size="small",
+			@click="submitTextChunk"
+		) Submit
+		v-btn.discardChanges(
+			size="small",
+			@click="discardChanges"
+		) Discard
+
+
 </template>
 
 <script lang="ts">
