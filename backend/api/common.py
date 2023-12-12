@@ -1,4 +1,4 @@
-import jsonpickle
+import jsonpickle  # type: ignore
 
 
 class ASRConfig:
@@ -12,6 +12,7 @@ class ASRConfig:
         )  # seconds * samples/second = samples
         # FIXME: Write language codes for all supported languages
         self.supported_languages = ["cs", "en"]
+
 
 class Timespan:
     def __init__(self, start: float, end: float):
@@ -49,6 +50,3 @@ def format_timestamp(
 
     hours_marker = f"{hours:02d}:" if always_include_hours or hours > 0 else ""
     return f"{hours_marker}{minutes:02d}:{seconds:02d}{decimal_marker}{milliseconds:03d}"
-
-
-

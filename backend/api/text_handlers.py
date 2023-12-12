@@ -1,10 +1,12 @@
-import jsonpickle
+import jsonpickle  # type: ignore
 from typing import Dict, List, Tuple, Union
 from common import format_timestamp, Timespan
 import time
+import re
 
 
 def break_line(line: str, length: int):
+    """Breaks a line at the last space before the given length, or changes nothing"""
     break_index = min(len(line) // 2, length)  # split evenly or at maximum length
 
     # work backwards from that guess to split between words
@@ -28,7 +30,7 @@ class ASRTextUnit:
         self.timespan = timespan
         # @Qwedux: I am not sure if TextUnit has to know it's version
         self.version = version
-        self.rating = 0
+        self.rating:int = 0
 
     def __str__(self) -> str:
         """Returns .srt format of the text unit
@@ -44,14 +46,25 @@ class ASRTextUnit:
         This is some transcribed text.
         ```
         """
+
+        def clean_text(text, line_length: int = 0):
+            text = re.sub(r"-+>", "->", text)
+
+            if line_length > 0 and len(text) > line_length:
+                # break at N characters as per Netflix guidelines
+                text = break_line(text, line_length)
+
+            return text
+
+        cleaned_text = clean_text(self.text, line_length=0)
         return (
             f"{self.timestamp}\n"
             + format_timestamp(self.timespan.start, always_include_hours=True, decimal_marker=",")
             + "--> "
             + format_timestamp(self.timespan.end, always_include_hours=True, decimal_marker=",")
             + "\n"
-            + self.text.strip().replace("-->", " ->")
-            + "\n"
+            + cleaned_text
+            + "\n\n"
         )
 
     def raw_text(self) -> str:
@@ -68,45 +81,133 @@ class ASRTextUnit:
         return res
 
 
+class SourceString:
+    def __init__(self, string: str, active: bool) -> None:
+        self.string = string
+        self.active = active
+
+    def to_json(self):
+        res = jsonpickle.encode(self, unpicklable=True, indent=4)
+        assert isinstance(res, str)
+        return res
+
+    def from_json(self, json_str: str):
+        res = jsonpickle.decode(json_str)
+        assert isinstance(res, SourceString)
+        return res
+
+
+class CorrectionRule:
+    def __init__(self) -> None:
+        self.source_strings: List[SourceString] = []
+        self.to: str = ""
+        self.version: int = -1
+
+    def to_json(self):
+        res = jsonpickle.encode(self, unpicklable=True, indent=4)
+        assert isinstance(res, str)
+        return res
+
+    def from_json(self, json_str: str):
+        res = jsonpickle.decode(json_str)
+        assert isinstance(res, CorrectionRule)
+        return res
+
+    def decode_from_dict(self, input_dict):
+        """Gets:
+        ```
+        {
+            "source_strings": [
+                {
+                    "string": str,
+                    "active": bool
+                },
+                ...
+            ],
+            "to": str,
+            "version": int,
+        }
+        ```
+        produces a CorrectionRule
+        """
+
+        self.source_strings = [
+            SourceString(string=src_string["string"], active=src_string["active"])
+            for src_string in input_dict["source_strings"]
+        ]
+        self.to = input_dict["to"]
+        self.version = input_dict["version"]
+
+    def encode_to_dict(self):
+        """Produces:
+        ```
+        {
+            "source_strings": [
+                {
+                    "string": str,
+                    "active": bool
+                },
+                ...
+            ],
+            "to": str,
+            "version": int,
+        }
+        ```
+        """
+        return {
+            "source_strings": [
+                {"string": src_string.string, "active": src_string.active}
+                for src_string in self.source_strings
+            ],
+            "to": self.to,
+            "version": self.version,
+        }
+
+
 class CurrentASRText:
     def __init__(self, save_path: str, language: str) -> None:
         self.text_chunks: Dict[int, List[ASRTextUnit]] = dict()
         """dict of timestamp -> version -> ASRTextUnit"""
         self.save_path = save_path
         self.language = language
-        # TODO: Abstract correction rule into a class
-        self.correction_rules: List[Dict[str, Union[str, int, Dict[str, Union[str, bool]]]]] = []
-        """Corrrection rules have the following general structure:
-        ```
-        [
-            {
-                "from": [
-                    {
-                        "string": str,
-                        "active": bool
-                    },
-                    ...
-                ],
-                "to": str,
-                "version": int,
-            },
-            ...
-        ]
-        ```
-        """
+        self.correction_rules: List[CorrectionRule] = []
 
-    def edit_correction_rules(
-        self, correction_rules: List[Dict[str, Union[str, int, Dict[str, Union[str, bool]]]]]
-    ) -> None:
-        # TODO: Versioning of correction rules? Right now we just overwrite the old ones
-        self.correction_rules = correction_rules
+    def __str__(self) -> str:
+        """Returns .srt format of the text chunks"""
+        ret_value = []
+        for timestamp in sorted(self.text_chunks.keys()):
+            ret_value.append(str(self.text_chunks[timestamp][-1]))
+        return "".join(ret_value)
+
+    def raw_text(self) -> str:
+        ret_value = []
+        for timestamp in sorted(self.text_chunks.keys()):
+            ret_value.append(self.text_chunks[timestamp][-1].raw_text())
+        return " ".join(ret_value)
+
+    def to_json(self):
+        res = jsonpickle.encode(self, unpicklable=True, indent=4)
+        assert isinstance(res, str)
+        return res
+
+    def from_json(self, json_str: str):
+        res = jsonpickle.decode(json_str)
+        assert isinstance(res, CurrentASRText)
+        return res
+
+    def clear_empty_correction_rules(self) -> None:
+        # DONE: Versioning of correction rules? Right now we just overwrite the old ones
         # remove empty correction rules
         for rule in self.correction_rules:
-            rule["from"] = [
-                source_string for source_string in rule["from"] if source_string["string"] != ""
+            rule.source_strings = [
+                source_string
+                for source_string in rule.source_strings
+                if source_string.string != ""
             ]
         self.correction_rules = [
-            rule for rule in self.correction_rules if len(rule["from"]) > 0 and rule["to"] != ""
+            rule
+            for rule in self.correction_rules
+            if len(rule.source_strings) > 0 and rule.to != ""
         ]
 
         current_time = str(time.time()).replace(".", "_")
@@ -119,9 +220,9 @@ class CurrentASRText:
     def longest_correction_rule_source(self) -> int:
         longest_rule = 0
         for rule in self.correction_rules:
-            for source_string in rule["from"]:
-                if source_string["active"] and len(source_string["string"]) > longest_rule:
-                    longest_rule = len(source_string["string"])
+            for source_string in rule.source_strings:
+                if source_string.active and len(source_string.string) > longest_rule:
+                    longest_rule = len(source_string.string)
         return longest_rule
 
     def apply_correction_rules(self, text: str) -> str:
@@ -133,12 +234,12 @@ class CurrentASRText:
             rules_skipped = 0
             for rule in self.correction_rules:
                 rule_skipped = True
-                for source_string in rule["from"]:
-                    if source_string["active"] and source_string["string"] in text_buffer:
+                for source_string in rule.source_strings:
+                    if source_string.active and source_string.string in text_buffer:
                         rule_skipped = False
                         # remove source_string["string"] from the end of text_buffer
-                        text_buffer = text_buffer[: -len(source_string["string"])]
-                        new_text.append(text_buffer + rule["to"])
+                        text_buffer = text_buffer[: -len(source_string.string)]
+                        new_text.append(text_buffer + rule.to)
                         text_buffer = ""
                         break
                 if not rule_skipped:
@@ -146,18 +247,23 @@ class CurrentASRText:
                 rules_skipped += rule_skipped
 
             if rules_skipped == len(self.correction_rules):
-                # we skipped all rules, keep only longest_correction_rule_source()-1 characters
-                # in text_buffer
-                remove_chars_num = len(text_buffer) - self.longest_correction_rule_source() + 1
-                remove_chars_num = min(remove_chars_num, len(text_buffer))
-                new_text.append(text_buffer[:remove_chars_num])
-                text_buffer = text_buffer[remove_chars_num:]
+                if len(text_buffer) > self.longest_correction_rule_source():
+                    # we skipped all rules, keep only longest_correction_rule_source()-1 characters
+                    # in text_buffer
+                    remove_chars_num = len(text_buffer) - self.longest_correction_rule_source() + 1
+                    remove_chars_num = min(remove_chars_num, len(text_buffer))
+                    new_text.append(text_buffer[:remove_chars_num])
+                    text_buffer = text_buffer[remove_chars_num:]
 
         new_text.append(text_buffer)
         return "".join(new_text)
 
-    def append(self, text: str, timestamp: int, timespan: Timespan) -> None:
+    def append(self, text: str, timespan: Timespan) -> None:
         """Creates a new text chunk at the given timestamp with the given text"""
+        if text == "":
+            return
+
+        timestamp = max(self.text_chunks.keys()) + 1 if len(self.text_chunks.keys()) > 0 else 0
         corrected_text = self.apply_correction_rules(text)
         new_text_unit = ASRTextUnit(text=corrected_text, timestamp=0, timespan=timespan, version=0)
         self.text_chunks[timestamp] = [new_text_unit]
@@ -180,14 +286,14 @@ class CurrentASRText:
     def get_latest_text_chunks(self, versions: Dict[int, int]):
         ret_value: List[Dict[str, Union[int, str]]] = []
         for timestamp in self.text_chunks.keys():
-            newest_version = max(self.text_chunks[timestamp].keys())
+            newest_version = len(self.text_chunks[timestamp]) - 1
             if timestamp in versions:
                 if versions[timestamp] < newest_version:
                     ret_value.append(
                         {
                             "timestamp": timestamp,
                             "version": newest_version,
-                            "text": self.text_chunks[timestamp][newest_version],
+                            "text": self.text_chunks[timestamp][newest_version].raw_text(),
                         }
                     )
             else:
@@ -195,7 +301,7 @@ class CurrentASRText:
                     {
                         "timestamp": timestamp,
                         "version": newest_version,
-                        "text": self.text_chunks[timestamp][newest_version],
+                        "text": self.text_chunks[timestamp][newest_version].raw_text(),
                     }
                 )
         return ret_value
@@ -206,9 +312,12 @@ class CurrentASRText:
         """Edits the text chunk at the given timestamp and version to the given text"""
         if self.apply_correction_rules(text) == self.text_chunks[timestamp][-1].text:
             # if the text is the same as the newest version, discard the edit
-            return self.text_chunks[timestamp][-1], self.text_chunks[timestamp][-1].version
+            return (
+                self.text_chunks[timestamp][-1].raw_text(),
+                self.text_chunks[timestamp][-1].version,
+            )
 
-        # TODO: Maybe do something smarter with the version, not just discarding it
+        # DONE?: Maybe do something smarter with the version, not just discarding it
 
         new_text_unit = ASRTextUnit(
             text=self.apply_correction_rules(text),
@@ -224,7 +333,7 @@ class CurrentASRText:
         ) as f:
             print(new_text_unit.to_json(), file=f)
 
-        return new_text_unit.text, self.text_chunks[timestamp][-1].version
+        return new_text_unit.raw_text(), self.text_chunks[timestamp][-1].version
 
     def rate_text_chunk(self, timestamp: int, version: int, d_rating: int) -> None:
         """Rates the text chunk at the given timestamp and version with the given rating"""
@@ -234,21 +343,21 @@ class CurrentASRText:
 class CurrentASRTextContainer:
     def __init__(self, save_path: str, supported_languages: List[str]) -> None:
         self.current_texts = {
-            lang_id: CurrentASRText(save_path, lang_id) for lang_id in supported_languages
+            language: CurrentASRText(save_path, language) for language in supported_languages
         }
-    
+
     def get_latest_versions(self) -> Dict[str, Dict[int, int]]:
         return {
-            lang_id: self.current_texts[lang_id].get_latest_versions()
-            for lang_id in self.current_texts.keys()
+            language: self.current_texts[language].get_latest_versions()
+            for language in self.current_texts.keys()
         }
 
     def get_latest_text_chunks(self, versions: Dict[str, Dict[int, int]]):
         return {
-            lang_id: self.current_texts[lang_id].get_latest_text_chunks(versions[lang_id])
-            for lang_id in self.current_texts.keys()
+            language: self.current_texts[language].get_latest_text_chunks(versions[language])
+            for language in self.current_texts.keys()
         }
 
     def clear(self) -> None:
-        for lang_id in self.current_texts.keys():
-            self.current_texts[lang_id].clear()
+        for language in self.current_texts.keys():
+            self.current_texts[language].clear()
