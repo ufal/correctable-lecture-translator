@@ -2,9 +2,9 @@ import json
 import time
 
 import numpy as np
-import requests
+import requests # type: ignore
 import torch
-import whisper
+import whisper # type: ignore
 
 
 class ASRConfig:

@@ -1,6 +1,6 @@
 import os
 import json
-import requests
+import requests # type: ignore
 import time
 
 # I want to simulate sending one request evert second to localhost:5000
