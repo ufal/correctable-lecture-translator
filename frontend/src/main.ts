@@ -13,6 +13,7 @@ import Editor from "@/components/TextEditor.vue";
 import SessionList from "@/components/SessionList.vue";
 import DictEntry from "@/components/DictEntry.vue";
 import Dictionary from "@/components/Dictionary.vue";
+import Protected from "@/components/Protected.vue";
 
 // Composables
 import { createApp } from "vue";
@@ -28,6 +29,7 @@ app.component("text-editor", Editor);
 app.component("session-list", SessionList);
 app.component("dict-entry", DictEntry);
 app.component("dictionary", Dictionary);
+app.component("protected", Protected);
 
 registerPlugins(app);
 

@@ -20,7 +20,7 @@ class ASRBase:
         self.transcribe_kargs = {}
         self.original_language = lan
 
-        self.model = self.load_model(modelsize, cache_dir, model_dir)
+        self.model = self.load_model(modelsize, cache_dir, model_dir) # type: ignore
 
     def load_model(self, modelsize, cache_dir):
         raise NotImplementedError("must be implemented in the child class")
@@ -178,7 +178,8 @@ def main() -> None:
             if isinstance(audio[0], int):
                 audio = np.array(audio, dtype=np.float32) / 32768.0
             audio = np.array(audio, dtype=np.float32)
-
+            
+            print(source_language, transcript_language, file=sys.stderr)
             comp_node.asr_model.original_language = source_language
             # starting_ASR_time = time.time()
             if source_language == transcript_language:

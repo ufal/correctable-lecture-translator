@@ -1,7 +1,7 @@
 @import "theme";
 
 .dict {
-	margin-top: 70px;
+	margin-top: 1rem;
 	border-radius: 0.75rem;
 	padding: 1.5rem;
 	display: flex;
@@ -19,7 +19,7 @@
 	margin: 1rem;
 }
 
-.dictActions > * {
+.dictEntryActions > * {
 	margin: 0;
 }
 
@@ -31,6 +31,13 @@
 }
 
 .moveEntry {
+	background: none;
+	margin: auto;
+	height: 1.75rem !important;
+	color: $green !important;
+}
+
+.deleteEntry {
 	background: none;
 	margin: auto;
 	height: 1.75rem !important;
@@ -117,7 +124,7 @@
 	color: $dark-purple;
 }
 
-.dictActions {
+.dictEntryActions {
 	flex: 100%;
 	margin-top: 0.5rem;
 	animation: ease-in 1s linear;
@@ -138,7 +145,7 @@
 	}
 }
 
-.dictActions > * {
+.dictEntryActions > * {
 	animation: FadeIn 0.2s linear;
 	animation-fill-mode: both;
 }
@@ -180,6 +187,7 @@
 	flex-direction: column;
 	justify-content: center;
 	width: 1.75rem;
+	margin-left: 0.15rem;
 }
 
 @media screen and (max-width: 600px) {
@@ -187,7 +195,7 @@
 		width: 90vw;
 	}
 
-	.dictActions {
+	.dictEntryActions {
 		top: 6%;
 		right: 4%;
 	}

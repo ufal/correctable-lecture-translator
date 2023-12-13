@@ -11,7 +11,7 @@ import fs from "fs";
 let serverKey: Buffer;
 let serverCert: Buffer;
 let serverConfig;
-let port = 5001;
+let port = 443;
 
 try {
 	serverKey = fs.readFileSync(process.env.SERVERKEY!);

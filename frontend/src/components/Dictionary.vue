@@ -1,9 +1,25 @@
 <template lang="pug">
 v-container.dict
 	span.subTitle Global Phrase Replacement Rules
-	dict-entry(v-for="DictEntry in localDict.entries" , :dictEntry="DictEntry", :originalDict="localDictOriginal" @move-entry-up="moveEntryUp", @move-entry-down="moveEntryDown")
-	v-btn.newEntry(flat, icon="mdi-plus-circle-outline")
-
+	dict-entry(
+		v-for="(DictEntry, DictEntryIndex) in localDict.entries",
+		:dictEntry="DictEntry",
+		:dictEntryIndex="DictEntryIndex",
+		:originalDict="localDictOriginal",
+		@move-entry-up="moveEntryUp",
+		@delete-entry="deleteEntry",
+		@move-entry-down="moveEntryDown"
+	)
+	.dictEntryActions(v-if="localDict.locked")
+		v-btn.submitChanges(
+			size="small",
+			@click="submitChanges"
+		) Submit
+		v-btn.discardChanges(
+			size="small",
+			@click="discardChanges"
+		) Discard
+	v-btn.newEntry(flat, icon="mdi-plus-circle-outline", @click="addEntry")
 </template>
 
 <script lang="ts">
@@ -18,6 +34,10 @@ export default {
 	props: {
 		client: {
 			type: Object as PropType<AsrClient>,
+			required: true,
+		},
+		updateIntervalId: {
+			type: Number,
 			required: true,
 		},
 	},
@@ -94,42 +114,85 @@ export default {
 		},
 		moveEntryUp(to: string) {
 			var index = this.localDict.entries.findIndex((dictEntry) => dictEntry.to == to);
-
 			if (index - 1 < 0) {
 				// index is 0, add element to the end and remove it from start
 				this.localDict.entries.push(this.localDict.entries[0]);
 				this.localDict.entries.splice(0, 1);
+
+				this.localDictOriginal.entries.push(this.localDictOriginal.entries[0]);
+				this.localDictOriginal.entries.splice(0, 1);
 			} else {
 				var temp = this.localDict.entries[index - 1];
 				this.localDict.entries[index - 1] = this.localDict.entries[index];
 				this.localDict.entries[index] = temp;
 			}
-			this.localDict.locked = this.checkForChanges();
-			console.log(this.localDict.locked);
+		},
+		deleteEntry(to: string) {
+			var index = this.localDict.entries.findIndex((dictEntry) => dictEntry.to == to);
+			this.localDict.entries.splice(index, 1);
 		},
 		moveEntryDown(to: string) {
 			var index = this.localDict.entries.findIndex((dictEntry) => dictEntry.to == to);
-			console.log(index);
 			if (index + 1 > this.localDict.entries.length - 1) {
 				// index is last, add element to the start and remove it from end
 				this.localDict.entries.unshift(this.localDict.entries[this.localDict.entries.length - 1]);
 				this.localDict.entries.splice(this.localDict.entries.length - 1, 1);
+
+				this.localDictOriginal.entries.unshift(
+					this.localDictOriginal.entries[this.localDictOriginal.entries.length - 1],
+				);
+				this.localDictOriginal.entries.splice(this.localDictOriginal.entries.length - 1, 1);
 			} else {
 				var temp = this.localDict.entries[index + 1];
 				this.localDict.entries[index + 1] = this.localDict.entries[index];
 				this.localDict.entries[index] = temp!;
 			}
-			this.localDict.locked = this.checkForChanges();
-			console.log(this.localDict.locked);
+		},
+		addEntry() {
+			this.localDict.entries.push({
+				to: "REPLACE_WITH_" + this.localDict.entries.length,
+				source_strings: [
+					{
+						string: "TEXT_TO_REPLACE",
+						active: true,
+					},
+				],
+				active: true,
+				locked: false,
+			} as DictEntryType);
+		},
+		async submitChanges() {
+			await this.client.submitDict(this.localDict);
+			// unlock all entries
+			this.localDict.entries.forEach((dictEntry) => {
+				dictEntry.locked = false;
+			});
+			this.localDictOriginal = JSON.parse(JSON.stringify(this.localDict));
+		},
+		discardChanges() {
+			// deep copy source_strings
+			this.localDict = JSON.parse(JSON.stringify(this.localDictOriginal));
+		},
+		async updateDict() {
+			if (this.localDict.locked) {
+				return;
+			}
+			this.localDict = await this.client.getDict();
+			this.localDictOriginal = JSON.parse(JSON.stringify(this.localDict));
+		},
+	},
+	watch: {
+		$data: {
+			handler: function () {
+				this.localDict.locked = this.checkForChanges();
+			},
+			deep: true,
 		},
 	},
 	async mounted() {
-		// this.localDict = await this.client.getDict();
-		// this.serverDict = await this.client.getDict();
 		this.localDictOriginal = JSON.parse(JSON.stringify(this.localDict));
 		this.serverDict = JSON.parse(JSON.stringify(this.localDict));
 
-		// TODO: refactor to a separate function and reuse
 		var btns = document.getElementsByClassName("wordAction disable");
 		for (var i = 0; i < btns.length; i++) {
 			btns[i].addEventListener("click", function () {

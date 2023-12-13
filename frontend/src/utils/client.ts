@@ -1,5 +1,6 @@
 import { TextChunk, TextChunkVersions, AudioChunk } from "./chunk";
 import fetchRetry from "fetch-retry";
+import { DictType } from "./dict";
 
 const retryingFetch = fetchRetry(fetch);
 
@@ -9,8 +10,9 @@ class AsrClient {
 	session: string;
 	sessionId: string;
 	constructor({
-		baseUrl = "http://localhost:80",
-		// baseUrl = "https://slt.ufal.mff.cuni.cz:5003", TODO: uncomment
+		// baseUrl = "http://localhost:80",
+		baseUrl = "https://slt.ufal.mff.cuni.cz:5003",
+		// baseUrl = "https://coletra.ufal.mff.cuni.cz/api",
 		additionalHeaders,
 		sessionId = "default",
 	}: {
@@ -28,30 +30,24 @@ class AsrClient {
 	}
 
 	async get(api: string) {
-		const response = await retryingFetch(
-			this.baseUrl + api + this.session,
-			{
-				retries: 3,
-				retryDelay: 1000,
-				method: "GET",
-				headers: this.headers,
-			}
-		);
+		const response = await retryingFetch(this.baseUrl + api + this.session + "&" + "language=en", {
+			retries: 3,
+			retryDelay: 1000,
+			method: "GET",
+			headers: this.headers,
+		});
 		if (!response.ok) console.log(response.statusText);
 		return response.json();
 	}
 
 	async post(api: string, payload: object = {}) {
-		const response = await retryingFetch(
-			this.baseUrl + api + this.session,
-			{
-				retries: 3,
-				retryDelay: 1000,
-				method: "POST",
-				headers: this.headers,
-				body: JSON.stringify(payload),
-			}
-		);
+		const response = await retryingFetch(this.baseUrl + api + this.session + "&" + "language=en", {
+			retries: 3,
+			retryDelay: 1000,
+			method: "POST",
+			headers: this.headers,
+			body: JSON.stringify(payload),
+		});
 		if (!response.ok) console.error(response.statusText);
 		return response.json();
 	}
@@ -90,6 +86,7 @@ class AsrClient {
 		const res = await this.post("/get_latest_text_chunks", {
 			versions: chunkVersions,
 		});
+		console.log(res.text_chunks);
 		return res.text_chunks as TextChunk[];
 	}
 
@@ -100,6 +97,25 @@ class AsrClient {
 			version: res.version,
 			text: res.text,
 		} as TextChunk;
+	}
+
+	async submitDict(dict: DictType) {
+		const res = await this.post("/submit_correction_rules", dict);
+		return res;
+	}
+
+	async getDict() {
+		const res = await this.get("/get_correction_rules");
+		return res.dict as DictType;
+	}
+
+	async rateTextChunk(chunk: TextChunk, rating: number) {
+		const res = await this.post("/rate_text_chunk", {
+			timestamp: chunk.timestamp,
+			version: chunk.version,
+			rating_update: rating,
+		});
+		return res;
 	}
 }
 

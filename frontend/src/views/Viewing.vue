@@ -21,16 +21,15 @@ v-app-bar#appBar(:elevation="0")
 	v-btn.toggleUpdates(:icon="toggleUpdatesIcon", :color="toggleUpdatesColor", @click="toggleUpdates")
 
 v-container.editor(v-if="editorMode")
-	dictionary(:client="client")
-	v-divider(:thickness="3").bigDivider
 	text-editor(:client="client", :textChunks="textChunks")
+	v-divider(:thickness="3").bigDivider
+	dictionary(:client="client", :updateIntervalId="updateIntervalId")
 
 v-container.viewer(v-else)
 	#viewingModeBtnsContainer
 		v-btn.viewingModeBtn.active(icon="mdi-file-eye-outline" size="large" @click="viewingMode = 'normal'")
 		v-btn.viewingModeBtn(icon="mdi-projector" size="large" @click="viewingMode = 'presentation'")
 	text-viewer.viewing-viewer(:client="client", :textChunks="textChunks")
-
 </template>
 
 <script lang="ts">
@@ -49,7 +48,7 @@ export default {
 			updateInterval: 1000,
 			updateIntervalId: 0,
 			toggleUpdatesIcon: "mdi-play",
-			editorMode: true,
+			editorMode: false,
 			toggleUpdatesColor: "#5b3e87",
 			viewingMode: "normal",
 		};
@@ -79,12 +78,10 @@ export default {
 				});
 			}
 		},
-
 		toggleUpdates() {
 			if (!this.updateIntervalId) {
 				this.client.setSessionId(this.sessionName);
-
-				this.updateIntervalId = window.setInterval(this.updateText, this.updateInterval);
+				// this.updateIntervalId = window.setInterval(this.updateText, this.updateInterval);
 				this.toggleUpdatesIcon = "mdi-pause";
 				this.toggleUpdatesColor = "#ea9d34";
 				console.info("Started updating text.");

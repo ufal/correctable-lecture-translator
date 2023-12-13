@@ -28,8 +28,6 @@
 			size="small",
 			@click="discardChanges"
 		) Discard
-
-
 </template>
 
 <script lang="ts">
@@ -93,30 +91,34 @@ export default {
 			this.showSubmit = false;
 		},
 		likeTextChunk() {
+			var rating = 0;
 			if (this.likeIcon == "mdi-thumb-up-outline") {
 				this.likeIcon = "mdi-thumb-up";
 				if (this.dislikeIcon == "mdi-thumb-down") {
 					this.dislikeIcon = "mdi-thumb-down-outline";
-					// this.client.undislikeTextChunk(this.chunk);
+					rating++;
 				}
-				// this.client.likeTextChunk(this.chunk);
+				rating++;
 			} else {
 				this.likeIcon = "mdi-thumb-up-outline";
-				// this.client.unlikeTextChunk(this.chunk);
+				rating--;
 			}
+			this.client.rateTextChunk(this.chunk, rating);
 		},
 		dislikeTextChunk() {
+			var rating = 0;
 			if (this.dislikeIcon == "mdi-thumb-down-outline") {
 				this.dislikeIcon = "mdi-thumb-down";
 				if (this.likeIcon == "mdi-thumb-up") {
 					this.likeIcon = "mdi-thumb-up-outline";
-					// this.client.unlikeTextChunk(this.chunk);
+					rating--;
 				}
-				// this.client.dislikeTextChunk(this.chunk);
+				rating--;
 			} else {
 				this.dislikeIcon = "mdi-thumb-down-outline";
-				// this.client.undislikeTextChunk(this.chunk);
+				rating++;
 			}
+			this.client.rateTextChunk(this.chunk, rating);
 		},
 	},
 
