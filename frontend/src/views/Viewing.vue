@@ -46,7 +46,7 @@ export default {
 			client: new AsrClient({}),
 			textChunks: [] as TextChunk[],
 			sessionName: "default",
-			updateTextInterval: 1000,
+			updateInterval: 1000,
 			updateIntervalId: 0,
 			toggleUpdatesIcon: "mdi-play",
 			editorMode: true,
@@ -84,7 +84,7 @@ export default {
 			if (!this.updateIntervalId) {
 				this.client.setSessionId(this.sessionName);
 
-				this.updateIntervalId = window.setInterval(this.updateText, this.updateTextInterval);
+				this.updateIntervalId = window.setInterval(this.updateText, this.updateInterval);
 				this.toggleUpdatesIcon = "mdi-pause";
 				this.toggleUpdatesColor = "#ea9d34";
 				console.info("Started updating text.");

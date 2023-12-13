@@ -32,7 +32,7 @@
 
 <script lang="ts">
 import "@/styles/dictionary.scss";
-import { DictEntryType } from "@/utils/dict";
+import { DictEntryType, DictType } from "@/utils/dict";
 import type { PropType } from "vue";
 
 export default {
@@ -40,6 +40,10 @@ export default {
 	props: {
 		dictEntry: {
 			type: Object as PropType<DictEntryType>,
+			required: true,
+		},
+		originalDict: {
+			type: Array as PropType<DictType[]>,
 			required: true,
 		},
 	},
@@ -70,8 +74,8 @@ export default {
 				);
 				this.dictEntry.source_strings.splice(this.dictEntry.source_strings.length - 1, 1);
 			} else {
-				var temp = this.dictEntry.source_strings.at(index + 1);
-				this.dictEntry.source_strings[index + 1] = this.dictEntry.source_strings.at(index)!;
+				var temp = this.dictEntry.source_strings[index + 1];
+				this.dictEntry.source_strings[index + 1] = this.dictEntry.source_strings[index];
 				this.dictEntry.source_strings[index] = temp!;
 			}
 			this.dictEntry.locked = this.checkForChanges();
@@ -88,8 +92,8 @@ export default {
 		},
 		toggleWord(e: Event, index: number) {
 			this.dictEntry.source_strings[index].active = !this.dictEntry.source_strings[index].active;
-            // @ts-ignore
-            e.target.classList.toggle("active");
+			// @ts-ignore
+			e.target.classList.toggle("active");
 			this.dictEntry.locked = this.checkForChanges();
 		},
 		deleteWord(index: number) {
@@ -121,24 +125,31 @@ export default {
 			return false;
 		},
 		moveEntryUp() {
-			this.$emit("moveEntryUp", this.originalDictEntry);
+			this.$emit("moveEntryUp", this.dictEntry.to);
 		},
 		moveEntryDown() {
-			this.$emit("moveEntryDown", this.originalDictEntry);
+			this.$emit("moveEntryDown", this.dictEntry.to);
 		},
-		deleteEntry() {
-			this.$emit("deleteEntry", this.originalDictEntry);
+		async deleteEntry() {
+			this.$emit("deleteEntry", this.dictEntry.to);
 			this.dictEntry.locked = true;
 		},
 		submitChanges() {
-			this.$emit("submitChanges", this.dictEntry);
+			this.$emit("submitChanges");
 			this.dictEntry.locked = false;
 		},
 		discardChanges() {
-			this.dictEntry.source_strings = this.originalDictEntry.source_strings;
+			// deep copy source_strings
+			this.dictEntry.source_strings = JSON.parse(JSON.stringify(this.originalDictEntry.source_strings));
 			this.dictEntry.to = this.originalDictEntry.to;
 			this.dictEntry.active = this.originalDictEntry.active;
 			this.dictEntry.locked = false;
+		},
+	},
+	watch: {
+		dictEntry: function () {
+			// @ts-ignore
+			this.originalDictEntry = this.originalDict.entries.find((dictEntry) => dictEntry.to == this.dictEntry.to);
 		},
 	},
 	mounted() {},

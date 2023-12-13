@@ -79,10 +79,11 @@
 	background: $overlay-low;
 	border-radius: 0.75rem;
 	background: rgba($green, 0.15);
-	padding: 1.5rem;
 	word-break: break-all;
-	z-index: 999;
+	text-wrap: balance;
 	white-space: break-spaces;
+	padding: 0.25rem;
+	z-index: 999;
 }
 
 .word {
@@ -95,13 +96,13 @@
 	text-wrap: balance;
 	word-break: break-word;
 	padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
+	padding-bottom: 0.5rem;
 }
 
 .wordActions {
-	margin:auto;
+	margin: auto;
 	margin-right: 0;
-	margin-left: 0.25rem;
+	margin-left: 0.15rem;
 }
 
 .wordAction {
@@ -120,24 +121,22 @@
 	flex: 100%;
 	margin-top: 0.5rem;
 	animation: ease-in 1s linear;
-
 }
-
 
 @keyframes FadeIn {
 	0% {
-	  opacity: 0;
-	  transform: scale(.1);
+		opacity: 0;
+		transform: scale(0.1);
 	}
 
 	85% {
-	  opacity: 1;
-	  transform: scale(1.05);
+		opacity: 1;
+		transform: scale(1.05);
 	}
 	100% {
-	  transform: scale(1);
+		transform: scale(1);
 	}
-  }
+}
 
 .dictActions > * {
 	animation: FadeIn 0.2s linear;
@@ -163,11 +162,11 @@
 .moveWordContainer {
 	place-content: flex-end;
 	display: flex;
-    flex-wrap: wrap;
+	flex-wrap: wrap;
 	margin: auto;
-    margin-left: 0;
-    margin-right: 0.25rem;
-    width: 4rem;
+	margin-left: 0;
+	margin-right: 0.15rem;
+	width: 4rem;
 }
 
 .moveWord {
