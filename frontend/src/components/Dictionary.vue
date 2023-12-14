@@ -98,19 +98,7 @@ export default {
 			// 	locked: false,
 			// } as DictType,
 			localDict: {
-				entries: [
-					{
-						to: "REPLACE_WITH_0",
-						source_strings: [
-							{
-								string: "TEXT_TO_REPLACE",
-								active: true,
-							},
-						],
-						active: true,
-						locked: false,
-					} as DictEntryType,
-				] as DictEntryType[],
+				entries: [] as DictEntryType[],
 				locked: false,
 			} as DictType,
 			serverDict: {} as DictType,
@@ -226,6 +214,11 @@ export default {
 	async mounted() {
 		this.localDictOriginal = JSON.parse(JSON.stringify(this.localDict));
 		this.serverDict = JSON.parse(JSON.stringify(this.localDict));
+
+		if (this.startUpdating) {
+			console.log("Starting updating dict.");
+			this.updateIntervalId = window.setInterval(this.updateDict, this.updateInterval);
+		}
 
 		var btns = document.getElementsByClassName("wordAction disable");
 		for (var i = 0; i < btns.length; i++) {

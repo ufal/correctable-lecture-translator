@@ -105,7 +105,7 @@ class AsrClient {
 
 	async getDict() {
 		const res = await this.get("/get_correction_rules");
-		return res.dict as DictType;
+		return res as DictType;
 	}
 
 	async rateTextChunk(chunk: TextChunk, rating: number) {
