@@ -52,6 +52,7 @@ export default {
 			editorMode: false,
 			toggleUpdatesColor: "#5b3e87",
 			viewingMode: "normal",
+			translationElement: {} as Element,
 		};
 	},
 
@@ -66,16 +67,21 @@ export default {
 			let textChunks = await this.client.getLatestTextChunks(currentChunkVersions);
 			if (textChunks.length == undefined) return;
 			textChunks.forEach((textChunk) => {
-				if (this.textChunks.length <= textChunk.timestamp) {
+				if (
+					this.textChunks.length <= textChunk.timestamp ||
+					textChunk.version > this.textChunks[textChunk.timestamp].version
+				) {
 					this.textChunks[textChunk.timestamp] = textChunk;
 				} else if (textChunk.version > this.textChunks[textChunk.timestamp].version) {
-					this.textChunks[textChunk.timestamp] = textChunk;
+					if (!this.textChunks[textChunk.timestamp].locked) {
+						this.textChunks[textChunk.timestamp] = textChunk;
+					}
 				}
 			});
 
 			if (!this.editorMode) {
-				window.scroll({
-					top: document.body.scrollHeight,
+				this.translationElement.scroll({
+					top: this.translationElement.scrollHeight,
 					behavior: "smooth",
 				});
 			}
@@ -120,6 +126,7 @@ export default {
 	async mounted() {
 		var menuBtnsContainer = document.getElementById("menuBtnsContainer");
 		var menuBtns = menuBtnsContainer!.getElementsByClassName("menuBtn");
+		this.translationElement = document.getElementsByClassName("translation")[0];
 		for (var i = 0; i < menuBtns.length; i++) {
 			var that = this;
 			menuBtns[i].addEventListener("click", function () {

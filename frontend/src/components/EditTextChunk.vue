@@ -67,14 +67,17 @@ export default {
 					text: this.updatedText,
 				} as TextChunk);
 				this.showSubmit = false;
+				this.chunk.locked = false;
 			}
 		},
 		onInput(e: any) {
 			this.updatedText = e.target.innerHTML;
 			if (this.updatedText.trim() != this.originalText.trim()) {
 				this.showSubmit = true;
+				this.chunk.locked = true;
 			} else {
 				this.showSubmit = false;
+				this.chunk.locked = false;
 			}
 		},
 		highlightFocused(e: any) {
@@ -89,6 +92,7 @@ export default {
 			// The "space" is discarded during the render.
 			this.originalText = this.originalText + " ";
 			this.showSubmit = false;
+			this.chunk.locked = false;
 		},
 		likeTextChunk() {
 			var rating = 0;
