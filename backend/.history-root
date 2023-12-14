@@ -1,0 +1,1 @@
+_T=20231214_19:23:55_1658043	 sudo SERVERKEY=/home/ufaladmin/SSL/2023/serverkey.pem SERVERCERT=/home/ufaladmin/SSL/2023/servercert.pem /home/speechtransedit/.venv/bin/python3 app.py

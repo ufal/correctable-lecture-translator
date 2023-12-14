@@ -30,7 +30,7 @@ class ASRTextUnit:
         self.timespan = timespan
         # @Qwedux: I am not sure if TextUnit has to know it's version
         self.version = version
-        self.rating:int = 0
+        self.rating: int = 0
 
     def __str__(self) -> str:
         """Returns .srt format of the text unit
@@ -136,7 +136,8 @@ class CorrectionRule:
             for src_string in input_dict["source_strings"]
         ]
         self.to = input_dict["to"]
-        self.version = input_dict["version"]
+        # self.version = input_dict["version"]
+        self.version = 0
 
     def encode_to_dict(self):
         """Produces:
@@ -263,12 +264,36 @@ class CurrentASRText:
         if text == "":
             return
 
-        timestamp = max(self.text_chunks.keys()) + 1 if len(self.text_chunks.keys()) > 0 else 0
+        timestamp = max(self.text_chunks.keys()) if len(self.text_chunks.keys()) > 0 else 0
         corrected_text = self.apply_correction_rules(text)
-        new_text_unit = ASRTextUnit(text=corrected_text, timestamp=0, timespan=timespan, version=0)
-        self.text_chunks[timestamp] = [new_text_unit]
+
+        if len(self.text_chunks.keys()) != 0 and len(self.text_chunks[timestamp][-1].text) < 35:
+            # if the last text chunk is too short, append to it instead of creating a new one
+            new_text_unit = ASRTextUnit(
+                text=self.text_chunks[timestamp][-1].text + corrected_text,
+                timestamp=timestamp,
+                timespan=Timespan(self.text_chunks[timestamp][-1].timespan.start, timespan.end),
+                version=self.text_chunks[timestamp][-1].version + 1,
+            )
+
+        else:
+            # timestamp + 1 because we create a new text chunk
+            timestamp = max(self.text_chunks.keys()) + 1 if len(self.text_chunks.keys()) > 0 else 0
+            new_text_unit = ASRTextUnit(
+                text=corrected_text, timestamp=timestamp, timespan=timespan, version=0
+            )
+            self.text_chunks[timestamp] = []
+
+        self.text_chunks[timestamp].append(new_text_unit)
         with open(
-            self.save_path + "/" + self.language + "/" + str(timestamp) + "_0" + ".json", "w"
+            self.save_path
+            + "/"
+            + self.language
+            + "/"
+            + str(timestamp)
+            + f"_{self.text_chunks[timestamp][-1].version}"
+            + ".json",
+            "w",
         ) as f:
             print(new_text_unit.to_json(), file=f)
 

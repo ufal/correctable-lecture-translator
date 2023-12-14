@@ -1,5 +1,5 @@
 from common import ASRConfig
-from text_handlers import CurrentASRTextContainer
+from text_handlers import CurrentASRTextContainer, Timespan
 from buffer_common import OnlineASRProcessor, create_tokenizer
 from typing import Dict, List, Union
 import json
@@ -16,6 +16,7 @@ class TranscribePacket:
         transcript_language: str,
         prompt: str,
         audio: List,
+        is_file: bool = False,
     ) -> None:
         """
         TranscribePacket is a container for audio and metadata in `processing_queue`.
@@ -37,6 +38,7 @@ class TranscribePacket:
         self.sent_out_time: float = 0.0
         self.transcript: Union[None, str] = None
         self.prompt: str = prompt
+        self.is_file: bool = is_file
 
     def is_completely_processed(self) -> bool:
         """
@@ -49,8 +51,6 @@ class TranscribePacket:
         Returns data to offload to ASR services.
         If no data is ready to be offloaded, returns None.
         """
-        print(type(self.audio))
-        print(len(self.audio))
         
         if self.transcript is None:
             if time.time() - self.sent_out_time > 15:
@@ -62,46 +62,74 @@ class TranscribePacket:
                     "transcript_language": self.transcript_language,
                     "prompt": self.prompt,
                     "audio": self.audio,
+                    "is_file": self.is_file,
                 }
         return None
 
 
 class TranslatePacket:
-    # FIXME: implement
-    def __init__(self):
-        raise NotImplementedError
+    def __init__(
+        self,
+        session_id: str,
+        timestamp: int,
+        source_language: str,
+        target_languages: List[str],
+        source_text: str,
+        timespan: Timespan,
+    ) -> None:
+        """
+        TranscribePacket is a container for audio and metadata in `processing_queue`.
+        It keeps track of language which has yet to recieve transcription of the audio
+        and provides audio data for processing.
 
-    # def got_offloaded_data(self, ASR_result: str, transcript_language: str):
-    #     """
-    #     Save the transcript of the audio chunk in the specified language.
-    #     """
-    #     self.transcript = ASR_result
+        Args:
+            session_id (str): The ID of the session.
+            timestamp (int): The numerical timestamp of the audio chunk.
+            source_language (str): The language of the audio chunk.
+            transcript_languages (List[str]): The language of the transcript.
+            audio (list): The audio data as a byte string.
+        """
+        self.session_id: str = session_id
+        self.timestamp: int = timestamp
+        self.source_language: str = source_language
+        self.target_languages: List[str] = target_languages
+        self.source_text = source_text
+        self.sent_out_time: float = 0.0
+        self.recieved = False
+        self.timespan = timespan
 
-    # def get_data_to_offload(self) -> Union[Dict[str, Union[str, int, List]], None]:
-    #     """
-    #     Returns data to offload to ASR services.
-    #     If no data is ready to be offloaded, returns None.
-    #     """
-    #     for i, transcript in enumerate(self.transcripts):
-    #         if transcript is None:
-    #             if time.time() - self.sent_out_times[i] > 15:
-    #                 self.sent_out_times[i] = time.time()
-    #                 return {
-    #                     "session_id": self.session_id,
-    #                     "timestamp": self.timestamp,
-    #                     "source_language": self.source_language,
-    #                     "transcript_language": self.transcript_languages[i],
-    #                     "audio": self.audio,
-    #                 }
-    #     return None
+    def is_completely_processed(self) -> bool:
+        """
+        Checks if audio has been completely transcribed.
+        """
+        return self.recieved
+
+    def get_data_to_offload(self) -> Union[Dict[str, Union[str, int, List]], None]:
+        """
+        Returns data to offload to ASR services.
+        If no data is ready to be offloaded, returns None.
+        """
+        
+        if (not self.recieved) and (time.time() - self.sent_out_time > 15):
+            self.sent_out_time = time.time()
+            return {
+                "session_id": self.session_id,
+                "timestamp": self.timestamp,
+                "source_language": self.source_language,
+                "target_languages": self.target_languages,
+                "source_text": self.source_text,
+                "timespan": self.timespan.to_json(),
+            }
+        return None
 
 
 class Session:
     def __init__(self, session_id: str, config: ASRConfig) -> None:
         self.session_id: str = session_id
         # DONE: Fix uselsess of these two after initialization
-        self.source_language: str = "en"  # default audio language
+        self.source_language: str = "cs"  # default audio language
         self.transcript_language: str = "en"  # default transcript language
+        self.supported_languages: List[str] = config.supported_languages
 
         self.save_path: str = self.get_save_folder(config.supported_languages)
         self.texts: CurrentASRTextContainer = CurrentASRTextContainer(
