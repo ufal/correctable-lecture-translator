@@ -2,8 +2,8 @@
 
 v-app-bar#appBar(:elevation="0")
 	template(v-slot:prepend)
-		v-icon.logo(
-			icon="mdi-translate",
+		img.logo(
+			src="@/assets/logo.svg",
 		)
 		.title Coletra
 		v-divider.logoSpacer(vertical, inset, thickness="2", length="40")
