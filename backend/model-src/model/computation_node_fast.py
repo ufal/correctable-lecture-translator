@@ -174,11 +174,12 @@ def main() -> None:
             session_id = json_data["session_id"]
             source_language = json_data["source_language"]
             transcript_language = json_data["transcript_language"]
+            is_file = json_data["is_file"]
 
             if isinstance(audio[0], int):
                 audio = np.array(audio, dtype=np.float32) / 32768.0
             audio = np.array(audio, dtype=np.float32)
-            
+
             print(source_language, transcript_language, file=sys.stderr)
             comp_node.asr_model.original_language = source_language
             # starting_ASR_time = time.time()
@@ -209,6 +210,7 @@ def main() -> None:
                         "tsw": tsw,
                         "ends": ends,
                         "language": transcript_language,
+                        "is_file": is_file,
                     },
                     verify=False,
                 )
