@@ -24,6 +24,7 @@ export default {
 	},
 	computed: {
 		getFinalText() {
+			if (this.textChunks == undefined) return;
 			const colorGradient = ["#005454", "#00887a"];
 			let finalText = this.textChunks
 				.slice(0, -colorGradient.length)

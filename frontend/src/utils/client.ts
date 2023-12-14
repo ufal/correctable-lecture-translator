@@ -86,7 +86,6 @@ class AsrClient {
 		const res = await this.post("/get_latest_text_chunks", {
 			versions: chunkVersions,
 		});
-		console.log(res.text_chunks);
 		return res.text_chunks as TextChunk[];
 	}
 

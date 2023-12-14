@@ -44,6 +44,10 @@
 	color: $green !important;
 }
 
+.invisible {
+	visibility: hidden;
+}
+
 .arrow {
 	display: flex;
 	justify-content: center;

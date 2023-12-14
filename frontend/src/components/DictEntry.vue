@@ -6,7 +6,7 @@
                 v-btn.wordAction.disable(flat, size="x-small", icon="mdi-eye-off-outline", @click="toggleWord($event, SourceStringIndex)")
                 v-btn.wordAction.delete(flat, size="x-small", icon="mdi-trash-can-outline", @click="deleteWord(SourceStringIndex)")
             .word(contenteditable="true" @input="editWordFrom($event, SourceStringIndex)") {{ SourceString.string }}
-            .moveWordContainer(v-if="dictEntry.source_strings.length > 1")
+            .moveWordContainer(:class="{ invisible: !(dictEntry.source_strings.length > 1) }")
                 v-btn.moveWord.up(flat, size="x-small", icon="mdi-menu-up", @click="moveWordUp(SourceStringIndex)")
                 v-btn.moveWord.down(flat, size="x-small" icon="mdi-menu-down" @click="moveWordDown(SourceStringIndex)")
         v-btn.newEntry(flat, size="x-small", icon="mdi-plus-circle-outline" @click="addWord")

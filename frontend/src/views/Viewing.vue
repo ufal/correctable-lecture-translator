@@ -23,7 +23,7 @@ v-app-bar#appBar(:elevation="0")
 v-container.editor(v-if="editorMode")
 	text-editor(:client="client", :textChunks="textChunks")
 	v-divider(:thickness="3").bigDivider
-	dictionary(:client="client", :updateIntervalId="updateIntervalId")
+	dictionary(:client="client", :startUpdating="updateDict", :updateInterval="updateInterval")
 
 v-container.viewer(v-else)
 	#viewingModeBtnsContainer
@@ -47,6 +47,7 @@ export default {
 			sessionName: "default",
 			updateInterval: 1000,
 			updateIntervalId: 0,
+			updateDict: false,
 			toggleUpdatesIcon: "mdi-play",
 			editorMode: false,
 			toggleUpdatesColor: "#5b3e87",
@@ -56,13 +57,14 @@ export default {
 
 	methods: {
 		async updateText() {
+			if (this.textChunks == undefined) return;
 			var currentChunkVersions = {} as TextChunkVersions;
 			this.textChunks.forEach((textChunk) => {
 				currentChunkVersions[textChunk.timestamp] = textChunk.version;
 			});
 
 			let textChunks = await this.client.getLatestTextChunks(currentChunkVersions);
-
+			if (textChunks.length == undefined) return;
 			textChunks.forEach((textChunk) => {
 				if (this.textChunks.length <= textChunk.timestamp) {
 					this.textChunks[textChunk.timestamp] = textChunk;
@@ -81,12 +83,14 @@ export default {
 		toggleUpdates() {
 			if (!this.updateIntervalId) {
 				this.client.setSessionId(this.sessionName);
-				// this.updateIntervalId = window.setInterval(this.updateText, this.updateInterval);
+				this.updateIntervalId = window.setInterval(this.updateText, this.updateInterval);
+				this.updateDict = true;
 				this.toggleUpdatesIcon = "mdi-pause";
 				this.toggleUpdatesColor = "#ea9d34";
 				console.info("Started updating text.");
 			} else {
 				window.clearInterval(this.updateIntervalId);
+				this.updateDict = false;
 				this.updateIntervalId = 0;
 				this.toggleUpdatesIcon = "mdi-play";
 				this.toggleUpdatesColor = "#5b3e87";
@@ -114,7 +118,6 @@ export default {
 		},
 	},
 	async mounted() {
-		// this.textChunks = await this.client.getLatestTextChunks({});
 		var menuBtnsContainer = document.getElementById("menuBtnsContainer");
 		var menuBtns = menuBtnsContainer!.getElementsByClassName("menuBtn");
 		for (var i = 0; i < menuBtns.length; i++) {
@@ -142,98 +145,98 @@ export default {
 		};
 
 		// Dummy debug text chunks
-		this.textChunks = [
-			{
-				timestamp: 0,
-				version: 0,
-				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
-			},
-			{
-				timestamp: 1,
-				version: 0,
-				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
-			},
-			{
-				timestamp: 2,
-				version: 0,
-				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
-			},
-			{
-				timestamp: 3,
-				version: 0,
-				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
-			},
-			{
-				timestamp: 4,
-				version: 0,
-				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
-			},
-			{
-				timestamp: 5,
-				version: 0,
-				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
-			},
-			{
-				timestamp: 6,
-				version: 0,
-				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
-			},
-			{
-				timestamp: 7,
-				version: 0,
-				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
-			},
-			{
-				timestamp: 8,
-				version: 0,
-				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
-			},
-			{
-				timestamp: 9,
-				version: 0,
-				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
-			},
-			{
-				timestamp: 10,
-				version: 0,
-				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
-			},
-			{
-				timestamp: 11,
-				version: 0,
-				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
-			},
-			{
-				timestamp: 12,
-				version: 0,
-				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich.  ",
-			},
-			{
-				timestamp: 13,
-				version: 0,
-				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
-			},
-			{
-				timestamp: 14,
-				version: 0,
-				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
-			},
-			{
-				timestamp: 15,
-				version: 0,
-				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
-			},
-			{
-				timestamp: 16,
-				version: 0,
-				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
-			},
-			{
-				timestamp: 17,
-				version: 0,
-				text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
-			},
-		];
+		// this.textChunks = [
+		// 	{
+		// 		timestamp: 0,
+		// 		version: 0,
+		// 		text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
+		// 	},
+		// 	{
+		// 		timestamp: 1,
+		// 		version: 0,
+		// 		text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
+		// 	},
+		// 	{
+		// 		timestamp: 2,
+		// 		version: 0,
+		// 		text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
+		// 	},
+		// 	{
+		// 		timestamp: 3,
+		// 		version: 0,
+		// 		text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
+		// 	},
+		// 	{
+		// 		timestamp: 4,
+		// 		version: 0,
+		// 		text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
+		// 	},
+		// 	{
+		// 		timestamp: 5,
+		// 		version: 0,
+		// 		text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
+		// 	},
+		// 	{
+		// 		timestamp: 6,
+		// 		version: 0,
+		// 		text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
+		// 	},
+		// 	{
+		// 		timestamp: 7,
+		// 		version: 0,
+		// 		text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
+		// 	},
+		// 	{
+		// 		timestamp: 8,
+		// 		version: 0,
+		// 		text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
+		// 	},
+		// 	{
+		// 		timestamp: 9,
+		// 		version: 0,
+		// 		text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
+		// 	},
+		// 	{
+		// 		timestamp: 10,
+		// 		version: 0,
+		// 		text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
+		// 	},
+		// 	{
+		// 		timestamp: 11,
+		// 		version: 0,
+		// 		text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
+		// 	},
+		// 	{
+		// 		timestamp: 12,
+		// 		version: 0,
+		// 		text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich.  ",
+		// 	},
+		// 	{
+		// 		timestamp: 13,
+		// 		version: 0,
+		// 		text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
+		// 	},
+		// 	{
+		// 		timestamp: 14,
+		// 		version: 0,
+		// 		text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
+		// 	},
+		// 	{
+		// 		timestamp: 15,
+		// 		version: 0,
+		// 		text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
+		// 	},
+		// 	{
+		// 		timestamp: 16,
+		// 		version: 0,
+		// 		text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
+		// 	},
+		// 	{
+		// 		timestamp: 17,
+		// 		version: 0,
+		// 		text: "Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. Hello, my name is John. I am a student at the University of Applied Sciences in Munich. ",
+		// 	},
+		// ];
 	},
 };
 </script>

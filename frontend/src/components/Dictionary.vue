@@ -36,69 +36,91 @@ export default {
 			type: Object as PropType<AsrClient>,
 			required: true,
 		},
-		updateIntervalId: {
+		startUpdating: {
+			type: Boolean,
+			required: true,
+		},
+		updateInterval: {
 			type: Number,
 			required: true,
 		},
 	},
 	data() {
 		return {
+			// localDict: {
+			// 	entries: [
+			// 		{
+			// 			to: "TEST_TO_1",
+			// 			source_strings: [
+			// 				{
+			// 					string: "TEST_FROM_1",
+			// 					active: true,
+			// 				},
+			// 				{
+			// 					string: "TEST_FROM_2",
+			// 					active: true,
+			// 				},
+			// 				{
+			// 					string: "TEST_FROM_3",
+			// 					active: true,
+			// 				},
+			// 			],
+			// 			active: true,
+			// 			locked: false,
+			// 		} as DictEntryType,
+			// 		{
+			// 			to: "TEST_TO_2",
+			// 			source_strings: [
+			// 				{
+			// 					string: "TEST_FROM_1",
+			// 					active: true,
+			// 				},
+			// 				{
+			// 					string: "TEST_FROM_2",
+			// 					active: true,
+			// 				},
+			// 			],
+			// 			active: true,
+			// 			locked: false,
+			// 		} as DictEntryType,
+			// 		{
+			// 			to: "TEST_TO_3",
+			// 			source_strings: [
+			// 				{
+			// 					string: "TEST_FROM_1",
+			// 					active: true,
+			// 				},
+			// 			],
+			// 			active: true,
+			// 			locked: false,
+			// 		} as DictEntryType,
+			// 	],
+			// 	locked: false,
+			// } as DictType,
 			localDict: {
 				entries: [
 					{
-						to: "TEST_TO_1",
+						to: "REPLACE_WITH_0",
 						source_strings: [
 							{
-								string: "TEST_FROM_1",
-								active: true,
-							},
-							{
-								string: "TEST_FROM_2",
-								active: true,
-							},
-							{
-								string: "TEST_FROM_3",
+								string: "TEXT_TO_REPLACE",
 								active: true,
 							},
 						],
 						active: true,
 						locked: false,
 					} as DictEntryType,
-					{
-						to: "TEST_TO_2",
-						source_strings: [
-							{
-								string: "TEST_FROM_1",
-								active: true,
-							},
-							{
-								string: "TEST_FROM_2",
-								active: true,
-							},
-						],
-						active: true,
-						locked: false,
-					} as DictEntryType,
-					{
-						to: "TEST_TO_3",
-						source_strings: [
-							{
-								string: "TEST_FROM_1",
-								active: true,
-							},
-						],
-						active: true,
-						locked: false,
-					} as DictEntryType,
-				],
+				] as DictEntryType[],
 				locked: false,
 			} as DictType,
 			serverDict: {} as DictType,
 			localDictOriginal: {} as DictType,
+			updateIntervalId: 0,
 		};
 	},
 	methods: {
 		checkForChanges() {
+			if (this.localDict.entries == undefined) return false;
 			if (this.localDict.entries.length != this.localDictOriginal.entries.length) {
 				return true;
 			}
@@ -187,6 +209,18 @@ export default {
 				this.localDict.locked = this.checkForChanges();
 			},
 			deep: true,
+		},
+		startUpdating: {
+			handler: function () {
+				if (this.startUpdating) {
+					console.log("Starting updating dict.");
+					this.updateIntervalId = window.setInterval(this.updateDict, this.updateInterval);
+				} else {
+					console.log("Stopping updating dict.");
+					window.clearInterval(this.updateIntervalId);
+					this.updateIntervalId = 0;
+				}
+			},
 		},
 	},
 	async mounted() {

@@ -40,7 +40,7 @@ export default defineComponent({
 	},
 	methods: {
 		validateBeforeSubmit() {
-			if (this.password === "VelmiSilneHeslo23") {
+			if (this.password === "VelmySylneHeslo23") {
 				const { cookies } = useCookies();
 				cookies.set("password", this.password);
 				this.auth.loggedIn = true;
@@ -52,7 +52,7 @@ export default defineComponent({
 	},
 	mounted() {
 		const { cookies } = useCookies();
-		if (cookies.get("password") === "VelmiSilneHeslo23") {
+		if (cookies.get("password") === "VelmySylneHeslo23") {
 			this.auth.loggedIn = true;
 		}
 	},
