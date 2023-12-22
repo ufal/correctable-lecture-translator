@@ -48,7 +48,11 @@ export default defineConfig({
 			},
 		}),
 	],
-	define: { "process.env": {} },
+	define: {
+		"process.env": {
+			API_URL: process.env.API_URL,
+		},
+	},
 	resolve: {
 		alias: {
 			"@": fileURLToPath(new URL("./src", import.meta.url)),

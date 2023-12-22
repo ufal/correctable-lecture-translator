@@ -10,9 +10,7 @@ class AsrClient {
 	session: string;
 	sessionId: string;
 	constructor({
-		// baseUrl = "http://localhost:80",
-		baseUrl = "https://slt.ufal.mff.cuni.cz:5003",
-		// baseUrl = "https://coletra.ufal.mff.cuni.cz/api",
+		baseUrl = String(process.env.API_URL),
 		additionalHeaders,
 		sessionId = "default",
 	}: {
