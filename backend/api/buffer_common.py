@@ -171,6 +171,8 @@ class OnlineASRProcessor:
         if len(self.audio_buffer) / self.SAMPLING_RATE > 30:
             # ...on the last completed segment (labeled by Whisper)
             self.chunk_completed_segment(ends)
+            
+
 
         return self.to_flush(o)
 
