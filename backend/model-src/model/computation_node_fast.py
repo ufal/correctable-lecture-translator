@@ -129,7 +129,7 @@ class ASRConfig:
         self.language = "en"  # Language code for transcription, e.g. en,de,cs.
         self.start_at = 0.0  # Start processing audio at this time.
         self.backend = "faster-whisper"  # Load only this backend for Whisper processing.
-        self.vad = False  # Use VAD = voice activity detection, with the default parameters.
+        self.vad = True  # Use VAD = voice activity detection, with the default parameters.
         self.SAMPLING_RATE = 16000
         self.model_cache_dir = None
         self.model_dir = None

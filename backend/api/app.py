@@ -23,6 +23,7 @@ import string
 from networking_common import Session, TranscribePacket, TranslatePacket
 from common import ASRConfig, Timespan
 from text_handlers import CorrectionRule
+from buffer_common import OnlineASRProcessor, create_tokenizer
 
 
 app = Flask(__name__)
@@ -134,6 +135,10 @@ def got_offloaded_data(session_id: str, timestamp: int, tsw, ends, language: str
         if not (x.session_id == session_id and x.timestamp == timestamp)
     ]
     commited = session.online_asr_processor.process_iter(tsw, ends)
+    if len(session.online_asr_processor.audio_buffer) / 16000 > 45:
+        session.online_asr_processor = OnlineASRProcessor(
+            create_tokenizer(session.transcript_language)
+        )
 
     if commited[0] is not None:
         assert isinstance(commited[0], float)

@@ -53,3 +53,11 @@ _T=20231214_19:33:30_1658043	 sudo SERVERKEY=serverkey.pem SERVERCERT=servercert
 _T=20231214_19:35:11_1658043	 sudo SERVERKEY=serverkey.pem SERVERCERT=servercert.pem /home/speechtransedit/.venv/bin/python3 app.py
 _T=20231214_19:35:52_1658043	 sudo SERVERKEY=serverkey.pem SERVERCERT=servercert.pem /home/speechtransedit/.venv/bin/python3 app.py
 _T=20231214_19:37:42_1658043	 sudo SERVERKEY=serverkey.pem SERVERCERT=servercert.pem /home/speechtransedit/.venv/bin/python3 app.py
+_T=20231214_19:51:29_1658043	 sudo SERVERKEY=serverkey.pem SERVERCERT=servercert.pem /home/speechtransedit/.venv/bin/python3 app.py
+_T=20231215_17:01:39_1856079	 sudo SERVERKEY=/home/ufaladmin/SSL/2023/serverkey.pem SERVERCERT=/home/ufaladmin/SSL/2023/servercert.pem /home/speechtransedit/.venv/bin/python3 app.py
+_T=20231215_18:08:07_1885857	 sudo SERVERKEY=/home/ufaladmin/SSL/2023/serverkey.pem SERVERCERT=/home/ufaladmin/SSL/2023/servercert.pem /home/speechtransedit/.venv/bin/python3 app.py
+_T=20231215_18:10:29_1885857	 sudo SERVERKEY=/home/ufaladmin/SSL/2023/serverkey.pem SERVERCERT=/home/ufaladmin/SSL/2023/servercert.pem /home/speechtransedit/.venv/bin/python3 app.py
+_T=20231215_18:18:59_1885857	 sudo SERVERKEY=/home/ufaladmin/SSL/2023/serverkey.pem SERVERCERT=/home/ufaladmin/SSL/2023/servercert.pem /home/speechtransedit/.venv/bin/python3 app.py
+_T=20231215_18:22:17_1885857	 sudo SERVERKEY=/home/ufaladmin/SSL/2023/serverkey.pem SERVERCERT=/home/ufaladmin/SSL/2023/servercert.pem /home/speechtransedit/.venv/bin/python3 app.py
+_T=20231215_19:44:47_1885857	 sudo SERVERKEY=/home/ufaladmin/SSL/2023/serverkey.pem SERVERCERT=/home/ufaladmin/SSL/2023/servercert.pem /home/speechtransedit/.venv/bin/python3 app.py
+_T=20231215_19:45:06_1885857	 sudo SERVERKEY=/home/ufaladmin/SSL/2023/serverkey.pem SERVERCERT=/home/ufaladmin/SSL/2023/servercert.pem /home/speechtransedit/.venv/bin/python3 app.py
