@@ -1,4 +1,4 @@
-<template lang="pug">
+<!-- <template lang="pug">
 v-app-bar(color="primary", prominent)
 	//- v-app-bar-nav-icon
 	v-toolbar-title(style="color: darkyello") Hermes
@@ -133,4 +133,4 @@ export default {
 		],
 	}),
 };
-</script>
+</script> -->

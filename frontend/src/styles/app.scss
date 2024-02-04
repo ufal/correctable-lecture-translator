@@ -1,0 +1,49 @@
+@import "theme";
+
+.v-application {
+	background-color: $surface !important;
+	color: $love !important;
+	font-family:
+		ui-sans-serif,
+		system-ui,
+		-apple-system,
+		BlinkMacSystemFont,
+		Segoe UI,
+		Roboto,
+		Helvetica Neue,
+		Arial,
+		Noto Sans,
+		sans-serif,
+		"Apple Color Emoji",
+		"Segoe UI Emoji",
+		Segoe UI Symbol,
+		"Noto Color Emoji" !important;
+    -webkit-font-smoothing: antialiased;
+    font-weight: 450;
+	scrollbar-color: $surface $overlay-medium;
+}
+
+.v-toolbar {
+	background: $surface !important;
+}
+
+::-webkit-scrollbar {
+	width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+	background: $surface;
+	border-radius: 0.75rem;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+	background: $overlay-medium;
+	border-radius: 0.75rem;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+	background: $muted;
+}

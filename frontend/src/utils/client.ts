@@ -1,5 +1,6 @@
 import { TextChunk, TextChunkVersions, AudioChunk } from "./chunk";
 import fetchRetry from "fetch-retry";
+import { DictType } from "./dict";
 
 const retryingFetch = fetchRetry(fetch);
 
@@ -9,7 +10,7 @@ class AsrClient {
 	session: string;
 	sessionId: string;
 	constructor({
-		baseUrl = "https://slt.ufal.mff.cuni.cz:5003",
+		baseUrl = String(process.env.API_URL),
 		additionalHeaders,
 		sessionId = "default",
 	}: {
@@ -27,30 +28,24 @@ class AsrClient {
 	}
 
 	async get(api: string) {
-		const response = await retryingFetch(
-			this.baseUrl + api + this.session,
-			{
-				retries: 3,
-				retryDelay: 1000,
-				method: "GET",
-				headers: this.headers,
-			}
-		);
+		const response = await retryingFetch(this.baseUrl + api + this.session + "&" + "language=en", {
+			retries: 3,
+			retryDelay: 1000,
+			method: "GET",
+			headers: this.headers,
+		});
 		if (!response.ok) console.log(response.statusText);
 		return response.json();
 	}
 
 	async post(api: string, payload: object = {}) {
-		const response = await retryingFetch(
-			this.baseUrl + api + this.session,
-			{
-				retries: 3,
-				retryDelay: 1000,
-				method: "POST",
-				headers: this.headers,
-				body: JSON.stringify(payload),
-			}
-		);
+		const response = await retryingFetch(this.baseUrl + api + this.session + "&" + "language=en", {
+			retries: 3,
+			retryDelay: 1000,
+			method: "POST",
+			headers: this.headers,
+			body: JSON.stringify(payload),
+		});
 		if (!response.ok) console.error(response.statusText);
 		return response.json();
 	}
@@ -99,6 +94,25 @@ class AsrClient {
 			version: res.version,
 			text: res.text,
 		} as TextChunk;
+	}
+
+	async submitDict(dict: DictType) {
+		const res = await this.post("/submit_correction_rules", dict);
+		return res;
+	}
+
+	async getDict() {
+		const res = await this.get("/get_correction_rules");
+		return res as DictType;
+	}
+
+	async rateTextChunk(chunk: TextChunk, rating: number) {
+		const res = await this.post("/rate_text_chunk", {
+			timestamp: chunk.timestamp,
+			version: chunk.version,
+			rating_update: rating,
+		});
+		return res;
 	}
 }
 

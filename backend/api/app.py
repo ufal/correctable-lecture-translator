@@ -1,62 +1,44 @@
 import json
-import os
-import time
-from typing import Dict, List, TextIO, Tuple, Union
+import os  # type: ignore
 
+# import time
+import jsonpickle  # type: ignore
+
+from typing import Dict, List, Union, Tuple
 from flask import Flask, Response, make_response, request
-from flask_cors import CORS
+from flask_cors import CORS  # type: ignore
+
+# for file upload
+import soundfile  # type: ignore
+import io
+
+# create random session_id
+import random
+import string
 
 # modules for ASR manipulation
 # from common import format_timestamp, break_line
 # from text_handlers import CurrentASRText
 # from audio_handler import AudioBuffer
-from networking_common import *
+from networking_common import Session, TranscribePacket, TranslatePacket
+from common import ASRConfig, Timespan
+from text_handlers import CorrectionRule
+from buffer_common import OnlineASRProcessor, create_tokenizer
 
 
 app = Flask(__name__)
 CORS(app)
 CONFIG = ASRConfig()
 sessions: Dict[str, Session] = dict()
-processing_queue: List[Dict[str, Union[str, int, List]]] = []
-# sessions["straka-mic-test"] = Session("straka-mic-test")
+processing_queue: List[TranscribePacket] = []
+processing_queue_translate: List[TranslatePacket] = []
+
+# TODO: subtitles to ~37 characters per chunk
+# TODO: edit chunks ~50 characters per chunk
+# TODO: chunk editable or not flag
 
 
-def make_dummy_data():
-    global sessions
-    session = Session("default", CONFIG)
-
-    session.text.append("Hello, my name is John.", 0)
-    session.text.append("I am a student at the University of Applied Sciences in Munich.", 1)
-    session.text.append("It is not a nice place to live", 2)
-    session.text.append("but it is a nice place to study.", 3)
-    session.text.append(
-        "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
-        4,
-    )
-    session.text.append(
-        "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,\
-         when an unknown printer took a galley of type and scrambled it to make a type\
-         specimen book.",
-        5,
-    )
-    session.text.append(
-        "It has survived not only five centuries, but also the leap into electronic\
-         typesetting, remaining essentially unchanged.",
-        6,
-    )
-    session.text.append(
-        "It was popularised in the 1960s with the release of Letraset sheets containing\
-         Lorem Ipsum passages, and more recently with desktop publishing software like\
-         Aldus PageMaker including versions of Lorem Ipsum.",
-        7,
-    )
-
-    sessions[session.session_id] = session
-
-
-# make_dummy_data()
-
-
+# DONE
 def add_cors_headers(response: Response):
     response.headers.add("Access-Control-Allow-Origin", "*")
     response.headers.add("Access-Control-Allow-Headers", "*")
@@ -64,7 +46,8 @@ def add_cors_headers(response: Response):
     return response
 
 
-def session_not_found(session_id: str):
+# DONE
+def session_not_found(session_id: Union[str, None] = None):
     response_data = {
         "success": False,
         "session_id": session_id,
@@ -76,59 +59,143 @@ def session_not_found(session_id: str):
     return response
 
 
+def plain_response(message: str):
+    response = make_response(message)
+    response.headers["Content-Type"] = "text/plain"
+    response = add_cors_headers(response)
+    return response
+
+
+def json_response(json_data):
+    response = make_response(json.dumps(json_data))
+    response.headers["Content-Type"] = "application/json"
+    response = add_cors_headers(response)
+    return response
+
+
+# DONE
 def get_data_to_offload():
     global processing_queue
 
+    # DONE: create items in processing queue from sessins with enough audio data
+    for session_id in sessions:
+        session = sessions[session_id]
+        if session.online_asr_processor.buffer_updated:
+            session.online_asr_processor.buffer_updated = False
+            processing_queue.append(
+                TranscribePacket(
+                    session_id=session_id,
+                    timestamp=session.online_asr_processor.last_timestamp,
+                    source_language=session.source_language,
+                    transcript_language=session.transcript_language,
+                    prompt=session.online_asr_processor.prompt()[0],
+                    audio=session.online_asr_processor.audio_buffer.tolist(),
+                )
+            )
+            session.untranscribed_timestamps.append(session.online_asr_processor.last_timestamp)
+            session.online_asr_processor.last_timestamp += 1
+
     for item in processing_queue:
-        session_id = item["session_id"]
-        timestamp = item["timestamp"]
-        audio = item["audio"]
-        source_language = item["source_language"]
-        transcript_language = item["transcript_language"]
-
-        if (
-            timestamp in sessions[session_id].sent_out_for_processing
-            and time.time() - sessions[session_id].sent_out_for_processing[timestamp] < 15
-        ):
-            # don't send the same request too soon if it was already sent
-            continue
-
-        sessions[session_id].sent_out_for_processing[timestamp] = time.time()
-
-        response_data = {
-            "success": True,
-            "session_id": session_id,
-            "timestamp": timestamp,
-            "source_language": source_language,
-            "transcript_language": transcript_language,
-            "audio": audio,
-        }
-        return response_data
+        response_data = item.get_data_to_offload()
+        if response_data is not None:
+            return response_data
 
     response_data = {"success": True, "timestamp": None, "audio": []}
     return response_data
 
 
-def got_offloaded_data(session_id: str, timestamp: int, ASR_result: str):
-    global processing_queue
+# DONE
+def got_offloaded_data(session_id: str, timestamp: int, tsw, ends, language: str):
+    global processing_queue, processing_queue_translate
 
-    if timestamp in sessions[session_id].text.text_chunks:
+    packet = None
+    # search for the TranscribePacket in the processing queue by session_id and timestamp
+    for item in processing_queue:
+        if item.session_id == session_id and item.timestamp == timestamp:
+            packet = item
+            break
+
+    if packet is None:
+        # no such packet found
+        return
+    assert isinstance(packet, TranscribePacket)
+
+    if packet.transcript is not None:
         # data already received
         return
+    packet.transcript = "Recieved data"
 
-    sessions[session_id].text.append(ASR_result, timestamp)
-    sessions[session_id].processed_timestamps.add(timestamp)
-    sessions[session_id].unprocessed_timestamps.remove(timestamp)
-    sessions[session_id].sent_out_for_processing.pop(timestamp, None)
+    session = sessions[session_id]
+    session.untranscribed_timestamps.remove(timestamp)
+    session.transcribed_timestamps.append(timestamp)
+
     processing_queue = [
         x
         for x in processing_queue
-        if not (x["session_id"] == session_id and x["timestamp"] == timestamp)
+        if not (x.session_id == session_id and x.timestamp == timestamp)
+    ]
+    commited = session.online_asr_processor.process_iter(tsw, ends)
+    if len(session.online_asr_processor.audio_buffer) / 16000 > 45:
+        session.online_asr_processor = OnlineASRProcessor(
+            create_tokenizer(session.transcript_language)
+        )
+
+    if commited[0] is not None:
+        assert isinstance(commited[0], float)
+        assert isinstance(commited[1], float)
+        session.texts.current_texts[language].append(
+            commited[2], Timespan(commited[0], commited[1])
+        )
+        processing_queue_translate.append(
+            TranslatePacket(
+                session_id=session_id,
+                timestamp=timestamp,
+                source_language=session.source_language,
+                target_languages=session.supported_languages,
+                source_text=commited[2],
+                timespan=Timespan(commited[0], commited[1]),
+            )
+        )
+
+
+def got_offloaded_file(session_id: str, timestamp: int, tsw, ends, language: str):
+    global processing_queue, processing_queue_translate
+
+    packet = None
+    # search for the TranscribePacket in the processing queue by session_id and timestamp
+    for item in processing_queue:
+        if item.session_id == session_id and item.timestamp == timestamp:
+            packet = item
+            break
+
+    if packet is None:
+        # no such packet found
+        return
+    assert isinstance(packet, TranscribePacket)
+
+    if packet.transcript is not None:
+        # data already received
+        return
+    packet.transcript = "Recieved data"
+
+    session = sessions[session_id]
+    session.transcribed_timestamps.append(timestamp)
+
+    processing_queue = [
+        x
+        for x in processing_queue
+        if not (x.session_id == session_id and x.timestamp == timestamp)
     ]
 
+    # tsw has format [(beg,end,"word1"), ...]
+    #  we need to split it to text chunks with length ~40 characters
+    for i in range(len(tsw)):
+        session.texts.current_texts[language].append(tsw[i][2], Timespan(tsw[i][0], tsw[i][1]))
 
+
+# DONE
 @app.route("/submit_audio_chunk", methods=["POST"])
-def submit_audio_chunk():
+def submit_audio_chunk() -> Tuple[Response, int]:
     """Submit an audio chunk for processing.
 
     This route accepts a JSON payload with the following fields:
@@ -151,14 +218,18 @@ def submit_audio_chunk():
         {"success": true, "session_id": "default"}
         >>> requests.post("https://slt.ufal.mff.cuni.cz:5003/submit_audio_chunk?session_id=UNKNOWN_SESSION", json={"timestamp": 0, "chunk": {"0": 1, "1": 2}})
         {"success": false, "session_id": "UNKNOWN_SESSION", "message": "Session not found"}
-    """  # noqa: E501
+    """
 
     global CONFIG, sessions, processing_queue
 
     session_id = request.args.get("session_id", default=None, type=str)
     request_data = request.get_json()
-    timestamp = request_data["timestamp"]
-    chunk = request_data["chunk"]
+    assert isinstance(request_data, dict)
+    assert isinstance(request_data["timestamp"], int)
+    assert isinstance(request_data["chunk"], dict)
+
+    timestamp: int = request_data["timestamp"]
+    chunk: Dict[str, float] = request_data["chunk"]
 
     if session_id is None or session_id not in sessions or len(session_id) == 0:
         return session_not_found(session_id=session_id), 404
@@ -169,31 +240,17 @@ def submit_audio_chunk():
         return session_not_found(session_id=session_id), 404
 
     session.save_audio_chunk(chunk=chunk, timestamp=timestamp)
-    chunk: list[bytes] = [chunk[x] for x in chunk]
-    session.buffer.extend(chunk)
-    session.last_chunk_time = time.time()
-
-    if session.buffer.can_get_snippet(max(session.unprocessed_timestamps)):
-        processing_queue.append(
-            {
-                "session_id": session_id,
-                "timestamp": max(session.unprocessed_timestamps),
-                "source_language": session.source_language,
-                "transcript_language": session.transcript_language,
-                "audio": session.buffer.get_snippet(max(session.unprocessed_timestamps)),
-            }
-        )
-        session.unprocessed_timestamps.append(max(session.unprocessed_timestamps) + 1)
-        session.buffer.shift()
+    chunk_bytes: List[float] = [chunk[x] for x in chunk]
+    session.online_asr_processor.insert_audio_chunk(chunk_bytes)
 
     response_data = {"success": True, "session_id": session.session_id}
-
     response = make_response(json.dumps(response_data))
     response.headers["Content-Type"] = "application/json"
     response = add_cors_headers(response)
     return response, 200
 
 
+# DONE
 @app.route("/get_latest_text_chunks", methods=["POST"])
 def get_latest_text_chunks():
     """Get the latest text chunks.
@@ -228,16 +285,25 @@ def get_latest_text_chunks():
 
     global sessions
     session_id = request.args.get("session_id", default=None, type=str)
+    language = request.args.get("language", default=None, type=str)
+
     if session_id is None or session_id not in sessions or len(session_id) == 0:
         return session_not_found(session_id=session_id), 404
+    if language is None or language not in sessions[session_id].texts.current_texts:
+        response = session_not_found(session_id=session_id)
+        response_data = json.loads(response.data)
+        response_data["message"] = "language not found"
+        response.data = json.dumps(response_data)
+        return response, 404
 
     request_data = request.get_json()
+    assert isinstance(request_data, dict)
     versions = request_data["versions"]
     versions = {int(x): versions[x] for x in versions}
 
     session = sessions[session_id]
-    text_chunks = session.text.get_latest_text_chunks(versions)
-    new_versions = session.text.get_latest_versions()
+    text_chunks = session.texts.current_texts[language].get_latest_text_chunks(versions)
+    new_versions = session.texts.current_texts[language].get_latest_versions()
 
     response_data = {
         "success": True,
@@ -252,6 +318,7 @@ def get_latest_text_chunks():
     return response, 200
 
 
+# DONE
 @app.route("/get_latest_text_chunk_versions", methods=["GET"])
 def get_latest_text_chunk_versions():
     """Get the latest versions of the text chunks.
@@ -277,11 +344,19 @@ def get_latest_text_chunk_versions():
 
     global sessions
     session_id = request.args.get("session_id", default=None, type=str)
+    language = request.args.get("language", default=None, type=str)
+
     if session_id is None or session_id not in sessions or len(session_id) == 0:
         return session_not_found(session_id=session_id), 404
+    if language is None or language not in sessions[session_id].texts.current_texts:
+        response = session_not_found(session_id=session_id)
+        response_data = json.loads(response.data)
+        response_data["message"] = "language not found"
+        response.data = json.dumps(response_data)
+        return response, 404
 
     session = sessions[session_id]
-    versions = session.text.get_latest_versions()
+    versions = session.texts.current_texts[language].get_latest_versions()
 
     response_data = {
         "success": True,
@@ -295,6 +370,7 @@ def get_latest_text_chunk_versions():
     return response, 200
 
 
+# DONE
 @app.route("/edit_asr_chunk", methods=["POST"])
 def edit_asr_chunk():
     """Edit an ASR chunk.
@@ -328,22 +404,29 @@ def edit_asr_chunk():
     global sessions
     request_data = request.get_json()
     session_id = request.args.get("session_id", default=None, type=str)
+    language = request.args.get("language", default=None, type=str)
     timestamp = request_data["timestamp"]
     version = request_data["version"]
     text = request_data["text"]
 
     if session_id is None or session_id not in sessions or len(session_id) == 0:
         return session_not_found(session_id=session_id), 404
+    if language is None or language not in sessions[session_id].texts.current_texts:
+        response = session_not_found(session_id=session_id)
+        response_data = json.loads(response.data)
+        response_data["message"] = "language not found"
+        response.data = json.dumps(response_data)
+        return response, 404
 
     session = sessions[session_id]
-    text, version_num = session.text.edit_text_chunk(timestamp, version, text)
+    text, version = session.texts.current_texts[language].edit_text_chunk(timestamp, version, text)
 
     response_data = {
         "success": True,
         "session_id": session.session_id,
         "text": text,
         "timestamp": timestamp,
-        "version": version_num,
+        "version": version,
     }
 
     response = make_response(json.dumps(response_data))
@@ -352,6 +435,7 @@ def edit_asr_chunk():
     return response, 200
 
 
+# DONE
 @app.route("/switch_source_language", methods=["POST"])
 def switch_source_language():
     """Switch the source language of the session.
@@ -399,6 +483,7 @@ def switch_source_language():
     return response, 200
 
 
+# DONE
 @app.route("/switch_transcript_language", methods=["POST"])
 def switch_transcript_language():
     """Switch the transcript language of the session.
@@ -446,6 +531,7 @@ def switch_transcript_language():
     return response, 200
 
 
+# DONE
 @app.route("/offload_ASR", methods=["POST", "GET"])
 def offload_computation():
     """Offload ASR computation to the server.
@@ -473,36 +559,50 @@ def offload_computation():
     global CONFIG, sessions, processing_queue
     if request.method == "POST":
         request_data = request.get_json()
-        got_offloaded_data(
-            session_id=request_data["session_id"],
-            timestamp=int(request_data["timestamp"]),
-            ASR_result=request_data["ASR_result"]["text"],
-        )
+        assert isinstance(request_data, dict)
+
+        if request_data["is_file"]:
+            got_offloaded_file(
+                session_id=request_data["session_id"],
+                timestamp=int(request_data["timestamp"]),
+                tsw=request_data["tsw"],
+                ends=request_data["ends"],
+                language=request_data["language"],
+            )
+        else:
+            got_offloaded_data(
+                session_id=request_data["session_id"],
+                timestamp=int(request_data["timestamp"]),
+                tsw=request_data["tsw"],
+                ends=request_data["ends"],
+                language=request_data["language"],
+            )
 
         response_data = {
             "success": True,
         }
 
-        response = make_response(json.dumps(response_data))
+        response = make_response(jsonpickle.encode(response_data, unpicklable=True, indent=4))
         response.headers["Content-Type"] = "application/json"
         response = add_cors_headers(response)
         return response, 200
 
     elif request.method == "GET":
         response_data = get_data_to_offload()
-        response = make_response(json.dumps(response_data))
+        response = make_response(jsonpickle.encode(response_data, unpicklable=True, indent=4))
         response.headers["Content-Type"] = "application/json"
         response = add_cors_headers(response)
         return response, 200
 
     else:
         response_data = {"success": False, "message": "Method not allowed"}
-        response = make_response(json.dumps(response_data))
+        response = make_response(jsonpickle.encode(response_data, unpicklable=True, indent=4))
         response.headers["Content-Type"] = "application/json"
         response = add_cors_headers(response)
         return response, 405
 
 
+# DONE
 @app.route("/get_active_sessions", methods=["GET"])
 def get_active_sessions():
     """Get the active sessions.
@@ -526,6 +626,7 @@ def get_active_sessions():
     return response, 200
 
 
+# DONE
 @app.route("/create_session", methods=["GET"])
 def create_session():
     """Create a new session.
@@ -566,7 +667,7 @@ def create_session():
         response.data = json.dumps(response_data)
         return response, 404
 
-    sessions[session_id] = Session(session_id=session_id)
+    sessions[session_id] = Session(session_id=session_id, config=CONFIG)
     response_data = {
         "success": True,
         "message": f"Successfully created session {session_id}",
@@ -577,6 +678,7 @@ def create_session():
     return response, 200
 
 
+# DONE
 @app.route("/end_session", methods=["GET"])
 def end_session():
     """End a session.
@@ -611,7 +713,7 @@ def end_session():
 
     # throw away everything from processing queue that belongs to this session
     global processing_queue
-    processing_queue = [x for x in processing_queue if x["session_id"] != session_id]
+    processing_queue = [x for x in processing_queue if x.session_id != session_id]
 
     response_data = {
         "success": True,
@@ -623,10 +725,267 @@ def end_session():
     return response, 200
 
 
-if __name__ == "__main__":
+# DONE
+@app.route("/rate_text_chunk", methods=["POST"])
+def rate_text_chunk() -> Tuple[Response, int]:
+    global sessions
+    request_data = request.get_json()
+    session_id = request.args.get("session_id", default=None, type=str)
+    language = request.args.get("language", default=None, type=str)
+
+    timestamp = request_data["timestamp"]
+    version = request_data["version"]
+    rating_update = request_data["rating_update"]
+
+    if session_id is None or session_id not in sessions or len(session_id) == 0:
+        return session_not_found(session_id=session_id), 404
+    if language is None or language not in sessions[session_id].texts.current_texts:
+        response = session_not_found(session_id=session_id)
+        response_data = json.loads(response.data)
+        response_data["message"] = "language not found"
+        response.data = json.dumps(response_data)
+        return response, 404
+
+    session = sessions[session_id]
+    session.texts.current_texts[language].rate_text_chunk(timestamp, version, rating_update)
+    new_rating: int = session.texts.current_texts[language].text_chunks[timestamp][version].rating
+
+    response_data = {
+        "success": True,
+        "message": f"Successfully updated rating for {session_id}, language {language}, chunk_id {timestamp}, chunk_version {version}, rating_update {rating_update}, new_rating {new_rating}",
+    }
+
+    response = make_response(json.dumps(response_data))
+    response.headers["Content-Type"] = "application/json"
+    response = add_cors_headers(response)
+    return response, 200
+
+
+# DONE
+@app.route("/submit_correction_rules", methods=["POST"])
+def submit_correction_rules():
+    global sessions
+    request_data = request.get_json()['entries']
+    """Request data has following structure:
+    ```
+    [
+        {
+            "source_strings": [
+                {
+                    "string": "str",
+                    "active": "bool"
+                },
+            ],
+            "to": "str",
+            "version": "int",
+        },
+    ]
+    ```
+    """
+    session_id = request.args.get("session_id", default=None, type=str)
+    language = request.args.get("language", default=None, type=str)
+
+    if session_id is None or session_id not in sessions or len(session_id) == 0:
+        return session_not_found(session_id=session_id), 404
+    if language is None or language not in sessions[session_id].texts.current_texts:
+        response = session_not_found(session_id=session_id)
+        response_data = json.loads(response.data)
+        response_data["message"] = "language not found"
+        response.data = json.dumps(response_data)
+        return response, 404
+
+    session = sessions[session_id]
+    session.texts.current_texts[language].correction_rules = []
+
+    for rule in request_data:
+        session.texts.current_texts[language].correction_rules.append(CorrectionRule())
+        session.texts.current_texts[language].correction_rules[-1].decode_from_dict(rule)
+
+    # clear empty rules
+    session.texts.current_texts[language].clear_empty_correction_rules()
+    response_data = {
+        "success": True,
+        "message": f"Successfully uploaded rules for session {session_id}, language {language}",
+    }
+
+    response = make_response(json.dumps(response_data))
+    response.headers["Content-Type"] = "application/json"
+    response = add_cors_headers(response)
+    return response, 200
+
+
+# DONE
+@app.route("/get_correction_rules", methods=["GET"])
+def get_correction_rules():
+    global sessions
+    session_id = request.args.get("session_id", default=None, type=str)
+    language = request.args.get("language", default=None, type=str)
+
+    if session_id is None or session_id not in sessions or len(session_id) == 0:
+        return session_not_found(session_id=session_id), 404
+    if language is None or language not in sessions[session_id].texts.current_texts:
+        response = session_not_found(session_id=session_id)
+        response_data = json.loads(response.data)
+        response_data["message"] = "language not found"
+        response.data = json.dumps(response_data)
+        return response, 404
+
+    session = sessions[session_id]
+    response_data = []
+    for rule in session.texts.current_texts[language].correction_rules:
+        response_data.append(rule.encode_to_dict())
+
+    response_data = {
+        "locked": True,
+        "entries": response_data,
+    }
+    response = make_response(json.dumps(response_data))
+    response.headers["Content-Type"] = "application/json"
+    response = add_cors_headers(response)
+    return response, 200
+
+
+# DONE
+@app.route("/", methods=["GET"])
+def landing_page():
+    return plain_response("I work uwu"), 200
+
+
+# DONE
+@app.route("/submit_audio_file", methods=["POST"])
+def submit_audio_file():
+    if "file" not in request.files:
+        return plain_response("No file part"), 400
+
+    # get the file
+    audio_file = request.files["file"]
+    if audio_file.filename == "":
+        return plain_response("No selected file"), 400
+
+    audio_data = audio_file.read()
+    audio_data, sr = soundfile.read(io.BytesIO(audio_data))
+
+    if sr != 16000:
+        return plain_response(f"Wrong sample rate: {sr} instead of 16000"), 400
+
+    # get a random session_id
+    session_id = "".join(random.choice(string.ascii_letters) for i in range(32))
+    while session_id in sessions:
+        session_id = "".join(random.choice(string.ascii_letters) for i in range(32))
+
+    sessions[session_id] = Session(session_id=session_id, config=CONFIG)
+    session = sessions[session_id]
+    processing_queue.append(
+        TranscribePacket(
+            session_id=session_id,
+            timestamp=0,
+            source_language=session.source_language,
+            transcript_language=session.transcript_language,
+            prompt="",
+            audio=audio_data.tolist(),
+            is_file=True,
+        )
+    )
+
+    return (
+        json_response(
+            json_data={
+                "success": True,
+                "session_id": session.session_id,
+            }
+        ),
+        200,
+    )
+
+
+# DONE
+def got_translated_data(session_id, timestamp, timespan, translated_text):
+    global processing_queue_translate
+
+    packet = None
+    # search for the TranscribePacket in the processing queue by session_id and timestamp
+    for item in processing_queue_translate:
+        if item.session_id == session_id and item.timestamp == timestamp:
+            packet = item
+            break
+
+    if packet is None:
+        # no such packet found
+        return
+
+    assert isinstance(packet, TranslatePacket)
+
+    if packet.recieved:
+        # data already received
+        return
+    packet.recieved = True
+
+    session = sessions[session_id]
+
+    processing_queue_translate = [x for x in processing_queue_translate if not x == packet]
+
+    timespan = jsonpickle.decode(timespan)
+    assert isinstance(timespan, Timespan)
+
+    for language in translated_text:
+        if language != session.transcript_language:
+            session.texts.current_texts[language].append(translated_text[language], timespan)
+
+
+# DONE
+def get_translate_data():
+    for item in processing_queue_translate:
+        response_data = item.get_data_to_offload()
+        if response_data is not None:
+            return response_data
+
+    response_data = None
+    return response_data
+
+
+# DONE
+@app.route("/offload_translation", methods=["GET", "POST"])
+def offload_translation():
+    if request.method == "POST":
+        request_data = request.get_json()
+        assert isinstance(request_data, dict)
+
+        got_translated_data(
+            session_id=request_data["session_id"],
+            timestamp=int(request_data["timestamp"]),
+            translated_text=request_data["translated_text"],
+            timespan=request_data["timespan"],
+        )
+
+        response_data = {
+            "success": True,
+        }
+
+        response = make_response(jsonpickle.encode(response_data, unpicklable=True, indent=4))
+        response.headers["Content-Type"] = "application/json"
+        response = add_cors_headers(response)
+        return response, 200
+
+    elif request.method == "GET":
+        response_data = get_translate_data()
+        response = make_response(jsonpickle.encode(response_data, unpicklable=True, indent=4))
+        response.headers["Content-Type"] = "application/json"
+        response = add_cors_headers(response)
+        return response, 200
+
+    else:
+        response_data = {"success": False, "message": "Method not allowed"}
+        response = make_response(jsonpickle.encode(response_data, unpicklable=True, indent=4))
+        response.headers["Content-Type"] = "application/json"
+        response = add_cors_headers(response)
+        return response, 405
+
+
+# DONE
+def main() -> None:
     try:
-        servercert: str | None = os.environ["SERVERCERT"]
-        serverkey: str | None = os.environ["SERVERKEY"]
+        servercert: Union[str, None] = os.environ["SERVERCERT"]
+        serverkey: Union[str, None] = os.environ["SERVERKEY"]
     except KeyError:
         servercert = None
         serverkey = None
@@ -639,3 +998,7 @@ if __name__ == "__main__":
             host="slt.ufal.mff.cuni.cz",
             ssl_context=(servercert, serverkey),
         )
+
+
+if __name__ == "__main__":
+    main()

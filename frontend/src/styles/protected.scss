@@ -1,0 +1,19 @@
+@import 'theme';
+
+.form-control {
+	border: solid 2px $light-purple;
+    border-radius: 0.25rem;
+    margin-left: 0.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    background: $surface;
+}
+
+.password-btn {
+    background: $light-purple;
+    color: $black;
+    border-radius: 0.75rem;
+    padding: 0.5rem;
+    // margin-bottom: 1rem;
+    margin-left: 0.75rem;
+}

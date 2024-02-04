@@ -4,15 +4,12 @@ import { createRouter, createWebHistory } from "vue-router";
 const routes = [
 	{
 		path: "/",
-		component: () => import("@/views/Home.vue"),
+		component: () => import("@/views/Viewing.vue"),
+
 	},
 	{
-		path: "/viewer",
-		component: () => import("@/views/Viewer.vue"),
-	},
-	{
-		path: "/recorder",
-		component: () => import("@/views/Recorder.vue"),
+		path: "/record",
+		component: () => import("@/views/Recording.vue"),
 	},
 ];
 
@@ -20,5 +17,6 @@ const router = createRouter({
 	history: createWebHistory(),
 	routes,
 });
+
 
 export default router;

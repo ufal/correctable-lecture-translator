@@ -24,7 +24,9 @@
 
 **/recordings/*
 **/.nohup.out
-backend/api/__pycache__/
+**__pycache__/
 
 
 *.pem
+**.venv/
+backend/aaaaa.wav

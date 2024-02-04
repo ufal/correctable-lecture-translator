@@ -1,0 +1,192 @@
+@import "theme";
+
+@import url("https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap");
+
+#appBar {
+	transition: none !important;
+}
+
+.app-bar-shadow {
+	box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px !important;
+}
+
+.logo {
+	width: 1.75rem;
+}
+
+#menuBtnsContainer {
+	width: 18rem;
+}
+
+.menuBtn {
+	color: $text;
+	padding: 0.75rem;
+	border-radius: 0.75rem;
+	margin-left: 1rem;
+	cursor: pointer;
+	color: $dark-purple;
+}
+
+.menuBtn:hover {
+	background: $iris-low;
+}
+
+.menuBtn.active {
+	background: $iris-low;
+}
+
+.v-container {
+	max-width: 84vw;
+}
+
+.title {
+	margin-left: 0.5rem;
+	margin-top: 0.5rem;
+	color: $green;
+	font-size: 2.5rem;
+	font-weight: 700;
+	z-index: 9999;
+	// font-family: "Kalam", cursive;
+	font-family: "Josefin Sans", sans-serif;
+}
+
+.logoSpacer {
+	margin-left: 1rem;
+	margin-right: 0.5rem;
+	margin-top: 0.75rem !important;
+	color: $dark-purple;
+	opacity: 1;
+}
+
+.v-input__control {
+	grid-area: append !important;
+}
+
+.selectSession {
+	margin-top: 21px;
+	margin-left: 3rem;
+	z-index: 9999;
+}
+
+#selectSession {
+	width: 15.5rem;
+	height: 3rem;
+	background: $overlay-low;
+	color: $black;
+	border-radius: 0.75rem;
+	font-size: 0.915rem;
+	line-height: 1.25rem;
+}
+
+.v-field {
+	color: $gray !important;
+	border-radius: 0.75rem !important;
+}
+
+.v-field .v-label {
+	opacity: 0.75 !important;
+}
+
+.v-field--focused .v-label {
+	opacity: 1 !important;
+}
+
+.toggleUpdates {
+	color: $dark-purple;
+}
+
+.subTitle {
+	width: 100%;
+	font-family: "Josefin Sans", sans-serif !important;
+	font-weight: 700 !important;
+	color: $dark-purple !important;
+	font-size: 1.75rem;
+	text-align: center;
+}
+
+#viewingModeBtnsContainer {
+	margin-top: 64px;
+	height: 0;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+}
+
+.viewingModeBtn {
+	margin-left: 2rem;
+	margin-right: 2rem;
+	background: none;
+	box-shadow: none;
+	border: solid 2px $love;
+}
+
+.viewingModeBtn.active {
+	background: $love;
+	color: $surface;
+}
+
+.editing-viewer > .translation {
+	font-size: 1rem;
+	max-height: 30vh !important;
+	margin: 0 !important;
+	background: $surface;
+}
+
+.viewing-viewer {
+	margin-top: 5rem;
+}
+
+.viewing-viewer > .subTitle {
+	display: none;
+}
+
+.bigDivider {
+	color: $purple;
+	width: 100%;
+}
+
+.viewer {
+	max-width: 96vw;
+}
+
+@media screen and (max-width: 600px) {
+	.title {
+		font-size: 1rem;
+		width: 3.5rem !important;
+		margin: 0;
+	}
+
+	.selectSession {
+		margin: 22px -5px 0 0;
+	}
+
+	.toggleEditor {
+		margin: 0 0 0 -10px;
+	}
+
+	.editing-editor {
+		padding: 0;
+	}
+
+	.v-container {
+		max-width: 100vw;
+	}
+
+	.menuBtn {
+		font-size: 0.75rem;
+		margin-left: 0;
+	}
+
+	.title {
+		display: none;
+	}
+
+	#selectSession {
+		width: 6rem;
+	}
+
+	#menuBtnsContainer {
+		width: 10rem;
+	}
+}

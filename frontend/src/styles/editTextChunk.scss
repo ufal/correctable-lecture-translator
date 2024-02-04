@@ -1,0 +1,82 @@
+@import "theme";
+
+.container {
+	margin-top: 1.15rem;
+	// margin-bottom: 1.15rem;
+	background: $overlay-low;
+	border-radius: 0.75rem;
+	box-shadow: none;
+}
+
+.editTextChunk {
+	color: $black;
+	font-size: 1rem;
+	font-family: 'Roboto Slab', serif;
+	font-weight: 400;
+	text-wrap: balance;
+	padding: 1.25rem;
+	z-index: 999;
+	&:focus {
+		outline: none;
+	}
+}
+
+.actions {
+	min-height: 0;
+	height: 2rem;
+	color: $white !important;
+}
+
+.submitChanges {
+	margin: -2rem 0 -1rem 0.5rem;
+	color: $green !important;
+	font-size: 1rem !important;
+	opacity: 0.8;
+	background: none !important;
+	box-shadow: none !important;
+}
+
+.discardChanges {
+	margin: -2rem 0 -1rem 0;
+	color: $red !important;
+	opacity: 0.8;
+	font-size: 1rem !important;
+	background: none !important;
+	box-shadow: none !important;
+}
+
+.feedback {
+	margin:auto;
+	margin-right: 1rem;
+	display: flex;
+}
+
+.textFeedback {
+	display: flex;
+	justify-content: space-between;
+}
+
+.like {
+	color: $green !important;
+	margin: 0 !important;
+	background: none !important;
+	opacity: 0.8;
+	box-shadow: none !important;
+}
+
+.dislike {
+	color: $red !important;
+	margin: 0 !important;
+	background: none !important;
+	opacity: 0.8;
+	box-shadow: none !important;
+}
+
+@media screen and (max-width: 600px) {
+	.editTextChunk {
+		padding: 1rem;
+	}
+	.feedback {
+		flex-direction: column;
+	}
+}
