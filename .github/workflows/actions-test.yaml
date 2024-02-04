@@ -2,7 +2,7 @@ name: Apply changes to the server
 run-name: ${{ github.actor }} is running the workflow
 on: [push]
 jobs:
-    deploy-fe:
+    download-changes:
         runs-on: ubuntu-latest
         environment: correctable-lecture-translator
         steps:
