@@ -1,7 +1,7 @@
 # from typing import List
 import numpy as np
-import tokenize_uk # type: ignore
-from mosestokenizer import MosesTokenizer # type: ignore
+import tokenize_uk
+from mosestokenizer import MosesTokenizer
 from typing import List, Tuple
 
 # # DONE?: rework this according to computation_node_fast
@@ -171,8 +171,6 @@ class OnlineASRProcessor:
         if len(self.audio_buffer) / self.SAMPLING_RATE > 30:
             # ...on the last completed segment (labeled by Whisper)
             self.chunk_completed_segment(ends)
-            
-
 
         return self.to_flush(o)
 

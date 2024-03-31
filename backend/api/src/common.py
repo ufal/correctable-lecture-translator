@@ -1,4 +1,4 @@
-import jsonpickle  # type: ignore
+import jsonpickle
 
 
 class ASRConfig:

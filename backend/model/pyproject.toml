@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "model"
+version = "0.1.0"
+description = "Computation node running Whisper"
+authors = [
+    "Marko Čechovič <markocechovic@gmail.com>",
+    "Jakub Parada <5pjakub@gmail.com>",
+]
+packages = [{ include = "src", from = "." }]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+faster-whisper = "1.0.1"
+
+[tool.poetry.scripts]
+model = "src.computation_node_fast:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

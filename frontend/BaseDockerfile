@@ -1,5 +1,4 @@
 ### BASE DOCKER IMAGE FOR FASTER BUILDS ###
-
 FROM node:lts-alpine
 
 RUN apk add --no-cache python3 g++ make

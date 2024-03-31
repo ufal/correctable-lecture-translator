@@ -1,6 +1,5 @@
 ### PRODUCTION BUILD ###
-
-FROM crt-fe-base:latest
+FROM coletra-frontend-base:latest
 
 COPY  . .
 

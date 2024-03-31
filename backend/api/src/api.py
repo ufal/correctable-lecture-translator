@@ -1,30 +1,25 @@
-import json
-import os  # type: ignore
-
-# import time
-import jsonpickle  # type: ignore
-
-from typing import Dict, List, Union, Tuple
-from flask import Flask, Response, make_response, request
-from flask_cors import CORS  # type: ignore
-
-# for file upload
-import soundfile  # type: ignore
 import io
+import json
+import os
 
 # create random session_id
 import random
 import string
+from typing import Dict, List, Tuple
+
+import jsonpickle
+
+# for file upload
+import soundfile
+from flask import Flask, Response, make_response, request
+from flask_cors import CORS
+
+from .buffer_common import OnlineASRProcessor, create_tokenizer
+from .common import ASRConfig, Timespan
 
 # modules for ASR manipulation
-# from common import format_timestamp, break_line
-# from text_handlers import CurrentASRText
-# from audio_handler import AudioBuffer
-from networking_common import Session, TranscribePacket, TranslatePacket
-from common import ASRConfig, Timespan
-from text_handlers import CorrectionRule
-from buffer_common import OnlineASRProcessor, create_tokenizer
-
+from .networking_common import Session, TranscribePacket, TranslatePacket
+from .text_handlers import CorrectionRule
 
 app = Flask(__name__)
 CORS(app)
@@ -38,7 +33,6 @@ processing_queue_translate: List[TranslatePacket] = []
 # TODO: chunk editable or not flag
 
 
-# DONE
 def add_cors_headers(response: Response):
     response.headers.add("Access-Control-Allow-Origin", "*")
     response.headers.add("Access-Control-Allow-Headers", "*")
@@ -46,8 +40,7 @@ def add_cors_headers(response: Response):
     return response
 
 
-# DONE
-def session_not_found(session_id: Union[str, None] = None):
+def session_not_found(session_id: str | None = None):
     response_data = {
         "success": False,
         "session_id": session_id,
@@ -73,11 +66,10 @@ def json_response(json_data):
     return response
 
 
-# DONE
 def get_data_to_offload():
     global processing_queue
 
-    # DONE: create items in processing queue from sessins with enough audio data
+    # create items in processing queue from sessins with enough audio data
     for session_id in sessions:
         session = sessions[session_id]
         if session.online_asr_processor.buffer_updated:
@@ -92,7 +84,9 @@ def get_data_to_offload():
                     audio=session.online_asr_processor.audio_buffer.tolist(),
                 )
             )
-            session.untranscribed_timestamps.append(session.online_asr_processor.last_timestamp)
+            session.untranscribed_timestamps.append(
+                session.online_asr_processor.last_timestamp
+            )
             session.online_asr_processor.last_timestamp += 1
 
     for item in processing_queue:
@@ -104,7 +98,6 @@ def get_data_to_offload():
     return response_data
 
 
-# DONE
 def got_offloaded_data(session_id: str, timestamp: int, tsw, ends, language: str):
     global processing_queue, processing_queue_translate
 
@@ -188,12 +181,13 @@ def got_offloaded_file(session_id: str, timestamp: int, tsw, ends, language: str
     ]
 
     # tsw has format [(beg,end,"word1"), ...]
-    #  we need to split it to text chunks with length ~40 characters
+    # we need to split it to text chunks with length ~40 characters
     for i in range(len(tsw)):
-        session.texts.current_texts[language].append(tsw[i][2], Timespan(tsw[i][0], tsw[i][1]))
+        session.texts.current_texts[language].append(
+            tsw[i][2], Timespan(tsw[i][0], tsw[i][1])
+        )
 
 
-# DONE
 @app.route("/submit_audio_chunk", methods=["POST"])
 def submit_audio_chunk() -> Tuple[Response, int]:
     """Submit an audio chunk for processing.
@@ -212,11 +206,11 @@ def submit_audio_chunk() -> Tuple[Response, int]:
         - message (`str`): A message describing what went wrong if the request was not successful.
 
     Example:
-        >>> requests.post("https://slt.ufal.mff.cuni.cz:5003/submit_audio_chunk?session_id=default", json={"timestamp": 0, "chunk": {"0": 1, "1": 2}})
+        >>> requests.post("https://API_URL/submit_audio_chunk?session_id=default", json={"timestamp": 0, "chunk": {"0": 1, "1": 2}})
         {"success": true, "session_id": "default"}
-        >>> requests.post("https://slt.ufal.mff.cuni.cz:5003/submit_audio_chunk?session_id=default", json={"timestamp": 0, "chunk": {"0": 1.0, "1": 0.5}})
+        >>> requests.post("https://API_URL/submit_audio_chunk?session_id=default", json={"timestamp": 0, "chunk": {"0": 1.0, "1": 0.5}})
         {"success": true, "session_id": "default"}
-        >>> requests.post("https://slt.ufal.mff.cuni.cz:5003/submit_audio_chunk?session_id=UNKNOWN_SESSION", json={"timestamp": 0, "chunk": {"0": 1, "1": 2}})
+        >>> requests.post("https://API_URL/submit_audio_chunk?session_id=UNKNOWN_SESSION", json={"timestamp": 0, "chunk": {"0": 1, "1": 2}})
         {"success": false, "session_id": "UNKNOWN_SESSION", "message": "Session not found"}
     """
 
@@ -250,7 +244,6 @@ def submit_audio_chunk() -> Tuple[Response, int]:
     return response, 200
 
 
-# DONE
 @app.route("/get_latest_text_chunks", methods=["POST"])
 def get_latest_text_chunks():
     """Get the latest text chunks.
@@ -277,11 +270,11 @@ def get_latest_text_chunks():
         - message (`str`): A message describing what went wrong if the request was not successful.
 
     Example:
-        >>> requests.post("https://slt.ufal.mff.cuni.cz:5003/get_latest_text_chunks?session_id=default", json={"versions": {"0": 0, "1": 0}})
+        >>> requests.post("https://API_URL/get_latest_text_chunks?session_id=default", json={"versions": {"0": 0, "1": 0}})
         {"success": true, "session_id": "default", "text_chunks": [{"timestamp": 0, "version": 1, "text": "Hello world!"}, {"timestamp": 2, "version": 0, "text": "This is a new text!"}], "versions": {"0": 1, "1": 0, "2": 0}}
-        >>> requests.post("https://slt.ufal.mff.cuni.cz:5003/get_latest_text_chunks?session_id=UNKNOWN_SESSION", json={"versions": {"0": 0, "1": 0}})
+        >>> requests.post("https://API_URL/get_latest_text_chunks?session_id=UNKNOWN_SESSION", json={"versions": {"0": 0, "1": 0}})
         {"success": false, "session_id": "UNKNOWN_SESSION", "message": "Session not found"}
-    """  # noqa: E501
+    """
 
     global sessions
     session_id = request.args.get("session_id", default=None, type=str)
@@ -318,7 +311,6 @@ def get_latest_text_chunks():
     return response, 200
 
 
-# DONE
 @app.route("/get_latest_text_chunk_versions", methods=["GET"])
 def get_latest_text_chunk_versions():
     """Get the latest versions of the text chunks.
@@ -338,9 +330,9 @@ def get_latest_text_chunk_versions():
         - message (`str`): A message describing what went wrong if the request was not successful.
 
     Example:
-        >>> requests.get("https://slt.ufal.mff.cuni.cz:5003/get_latest_text_chunk_versions?session_id=default")
+        >>> requests.get("https://API_URL/get_latest_text_chunk_versions?session_id=default")
         {"success": true, "session_id": "default", "versions": {"0": 1, "1": 1, "2": 0}}
-    """  # noqa: E501
+    """
 
     global sessions
     session_id = request.args.get("session_id", default=None, type=str)
@@ -370,7 +362,6 @@ def get_latest_text_chunk_versions():
     return response, 200
 
 
-# DONE
 @app.route("/edit_asr_chunk", methods=["POST"])
 def edit_asr_chunk():
     """Edit an ASR chunk.
@@ -397,9 +388,9 @@ def edit_asr_chunk():
         - message (`str`): A message describing what went wrong if the request was not successful.
 
     Example:
-        >>> requests.post("https://slt.ufal.mff.cuni.cz:5003/edit_asr_chunk?session_id=default", json={"timestamp": 0, "version": 1, "text": "Hello there, my name is John Wick."})
+        >>> requests.post("https://API_URL/edit_asr_chunk?session_id=default", json={"timestamp": 0, "version": 1, "text": "Hello there, my name is John Wick."})
         {"success": true, "session_id": "default", "text": "Hello<span class='edited'> there</span>, my name is John<span class='edited'> Wick</span>.", "timestamp": 0, "version": 2}
-    """  # noqa: E501
+    """
 
     global sessions
     request_data = request.get_json()
@@ -419,7 +410,9 @@ def edit_asr_chunk():
         return response, 404
 
     session = sessions[session_id]
-    text, version = session.texts.current_texts[language].edit_text_chunk(timestamp, version, text)
+    text, version = session.texts.current_texts[language].edit_text_chunk(
+        timestamp, version, text
+    )
 
     response_data = {
         "success": True,
@@ -435,7 +428,6 @@ def edit_asr_chunk():
     return response, 200
 
 
-# DONE
 @app.route("/switch_source_language", methods=["POST"])
 def switch_source_language():
     """Switch the source language of the session.
@@ -457,9 +449,9 @@ def switch_source_language():
         - message (`str`): A message describing what went wrong if the request was not successful.
 
     Example:
-        >>> requests.post("https://slt.ufal.mff.cuni.cz:5003/switch_source_language?session_id=default", json={"language": "English"})
+        >>> requests.post("https://API_URL/switch_source_language?session_id=default", json={"language": "English"})
         {"success": true, "session_id": "default"}
-    """  # noqa: E501
+    """
 
     global sessions
     request_data = request.get_json()
@@ -483,7 +475,6 @@ def switch_source_language():
     return response, 200
 
 
-# DONE
 @app.route("/switch_transcript_language", methods=["POST"])
 def switch_transcript_language():
     """Switch the transcript language of the session.
@@ -505,9 +496,9 @@ def switch_transcript_language():
         - message (`str`): A message describing what went wrong if the request was not successful.
 
     Example:
-        >>> requests.post("https://slt.ufal.mff.cuni.cz:5003/switch_transcript_language?session_id=default", json={"language": "English"})
+        >>> requests.post("https://API_URL/switch_transcript_language?session_id=default", json={"language": "English"})
         {"success": true, "session_id": "default"}
-    """  # noqa: E501
+    """
 
     global sessions
     request_data = request.get_json()
@@ -531,7 +522,6 @@ def switch_transcript_language():
     return response, 200
 
 
-# DONE
 @app.route("/offload_ASR", methods=["POST", "GET"])
 def offload_computation():
     """Offload ASR computation to the server.
@@ -550,11 +540,11 @@ def offload_computation():
     - audio_chunk (`list`): The audio chunk to be processed.
 
     Example:
-        >>> requests.post("https://slt.ufal.mff.cuni.cz:5003/offload_ASR", json={"session_id": "default", "timestamp": 0, "ASR_result": {"text": "Hello world"}})
+        >>> requests.post("https://API_URL/offload_ASR", json={"session_id": "default", "timestamp": 0, "ASR_result": {"text": "Hello world"}})
         {"success": true}
-        >>> requests.get("https://slt.ufal.mff.cuni.cz:5003/offload_ASR")
+        >>> requests.get("https://API_URL/offload_ASR")
         {"session_id": "default", "timestamp": 0, "audio_chunk": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, ...]}
-    """  # noqa: E501
+    """
 
     global CONFIG, sessions, processing_queue
     if request.method == "POST":
@@ -582,27 +572,32 @@ def offload_computation():
             "success": True,
         }
 
-        response = make_response(jsonpickle.encode(response_data, unpicklable=True, indent=4))
+        response = make_response(
+            jsonpickle.encode(response_data, unpicklable=True, indent=4)
+        )
         response.headers["Content-Type"] = "application/json"
         response = add_cors_headers(response)
         return response, 200
 
     elif request.method == "GET":
         response_data = get_data_to_offload()
-        response = make_response(jsonpickle.encode(response_data, unpicklable=True, indent=4))
+        response = make_response(
+            jsonpickle.encode(response_data, unpicklable=True, indent=4)
+        )
         response.headers["Content-Type"] = "application/json"
         response = add_cors_headers(response)
         return response, 200
 
     else:
         response_data = {"success": False, "message": "Method not allowed"}
-        response = make_response(jsonpickle.encode(response_data, unpicklable=True, indent=4))
+        response = make_response(
+            jsonpickle.encode(response_data, unpicklable=True, indent=4)
+        )
         response.headers["Content-Type"] = "application/json"
         response = add_cors_headers(response)
         return response, 405
 
 
-# DONE
 @app.route("/get_active_sessions", methods=["GET"])
 def get_active_sessions():
     """Get the active sessions.
@@ -611,7 +606,7 @@ def get_active_sessions():
     - active_sessions (`list`): A list of active sessions.
 
     Example:
-        >>> requests.get("https://slt.ufal.mff.cuni.cz:5003/get_active_sessions")
+        >>> requests.get("https://API_URL/get_active_sessions")
         {"active_sessions": ["default"]}
     """
 
@@ -626,7 +621,6 @@ def get_active_sessions():
     return response, 200
 
 
-# DONE
 @app.route("/create_session", methods=["GET"])
 def create_session():
     """Create a new session.
@@ -640,11 +634,11 @@ def create_session():
         - message (`str`): A message describing what happened.
 
     Example:
-        >>> requests.get("https://slt.ufal.mff.cuni.cz:5003/create_session?session_id=default")
+        >>> requests.get("https://API_URL/create_session?session_id=default")
         {"success": true, "message": "Successfully created session default"}
-        >>> requests.get("https://slt.ufal.mff.cuni.cz:5003/create_session?session_id=session_already_exists")
+        >>> requests.get("https://API_URL/create_session?session_id=session_already_exists")
         {"success": false, "message": "Session already exists"}
-        >>> requests.get("https://slt.ufal.mff.cuni.cz:5003/create_session")
+        >>> requests.get("https://API_URL/create_session")
         {"success": false, "message": "Session ID not provided"}
     """
 
@@ -678,7 +672,6 @@ def create_session():
     return response, 200
 
 
-# DONE
 @app.route("/end_session", methods=["GET"])
 def end_session():
     """End a session.
@@ -696,9 +689,9 @@ def end_session():
         - session_id (`str`): The session ID of the session.
 
     Example:
-        >>> requests.get("https://slt.ufal.mff.cuni.cz:5003/end_session?session_id=default")
+        >>> requests.get("https://API_URL/end_session?session_id=default")
         {"success": true, "message": "Successfully ended session default"}
-        >>> requests.get("https://slt.ufal.mff.cuni.cz:5003/end_session?session_id=session_not_found")
+        >>> requests.get("https://API_URL/end_session?session_id=session_not_found")
         {"success": false, "message": "Session not found", "session_id": "session_not_found"}
     """
     global sessions
@@ -725,7 +718,6 @@ def end_session():
     return response, 200
 
 
-# DONE
 @app.route("/rate_text_chunk", methods=["POST"])
 def rate_text_chunk() -> Tuple[Response, int]:
     global sessions
@@ -747,8 +739,12 @@ def rate_text_chunk() -> Tuple[Response, int]:
         return response, 404
 
     session = sessions[session_id]
-    session.texts.current_texts[language].rate_text_chunk(timestamp, version, rating_update)
-    new_rating: int = session.texts.current_texts[language].text_chunks[timestamp][version].rating
+    session.texts.current_texts[language].rate_text_chunk(
+        timestamp, version, rating_update
+    )
+    new_rating: int = (
+        session.texts.current_texts[language].text_chunks[timestamp][version].rating
+    )
 
     response_data = {
         "success": True,
@@ -761,11 +757,10 @@ def rate_text_chunk() -> Tuple[Response, int]:
     return response, 200
 
 
-# DONE
 @app.route("/submit_correction_rules", methods=["POST"])
 def submit_correction_rules():
     global sessions
-    request_data = request.get_json()['entries']
+    request_data = request.get_json()["entries"]
     """Request data has following structure:
     ```
     [
@@ -799,7 +794,9 @@ def submit_correction_rules():
 
     for rule in request_data:
         session.texts.current_texts[language].correction_rules.append(CorrectionRule())
-        session.texts.current_texts[language].correction_rules[-1].decode_from_dict(rule)
+        session.texts.current_texts[language].correction_rules[-1].decode_from_dict(
+            rule
+        )
 
     # clear empty rules
     session.texts.current_texts[language].clear_empty_correction_rules()
@@ -814,7 +811,6 @@ def submit_correction_rules():
     return response, 200
 
 
-# DONE
 @app.route("/get_correction_rules", methods=["GET"])
 def get_correction_rules():
     global sessions
@@ -845,13 +841,11 @@ def get_correction_rules():
     return response, 200
 
 
-# DONE
 @app.route("/", methods=["GET"])
 def landing_page():
     return plain_response("I work uwu"), 200
 
 
-# DONE
 @app.route("/submit_audio_file", methods=["POST"])
 def submit_audio_file():
     if "file" not in request.files:
@@ -898,7 +892,6 @@ def submit_audio_file():
     )
 
 
-# DONE
 def got_translated_data(session_id, timestamp, timespan, translated_text):
     global processing_queue_translate
 
@@ -922,17 +915,20 @@ def got_translated_data(session_id, timestamp, timespan, translated_text):
 
     session = sessions[session_id]
 
-    processing_queue_translate = [x for x in processing_queue_translate if not x == packet]
+    processing_queue_translate = [
+        x for x in processing_queue_translate if not x == packet
+    ]
 
     timespan = jsonpickle.decode(timespan)
     assert isinstance(timespan, Timespan)
 
     for language in translated_text:
         if language != session.transcript_language:
-            session.texts.current_texts[language].append(translated_text[language], timespan)
+            session.texts.current_texts[language].append(
+                translated_text[language], timespan
+            )
 
 
-# DONE
 def get_translate_data():
     for item in processing_queue_translate:
         response_data = item.get_data_to_offload()
@@ -943,7 +939,6 @@ def get_translate_data():
     return response_data
 
 
-# DONE
 @app.route("/offload_translation", methods=["GET", "POST"])
 def offload_translation():
     if request.method == "POST":
@@ -961,41 +956,45 @@ def offload_translation():
             "success": True,
         }
 
-        response = make_response(jsonpickle.encode(response_data, unpicklable=True, indent=4))
+        response = make_response(
+            jsonpickle.encode(response_data, unpicklable=True, indent=4)
+        )
         response.headers["Content-Type"] = "application/json"
         response = add_cors_headers(response)
         return response, 200
 
     elif request.method == "GET":
         response_data = get_translate_data()
-        response = make_response(jsonpickle.encode(response_data, unpicklable=True, indent=4))
+        response = make_response(
+            jsonpickle.encode(response_data, unpicklable=True, indent=4)
+        )
         response.headers["Content-Type"] = "application/json"
         response = add_cors_headers(response)
         return response, 200
 
     else:
         response_data = {"success": False, "message": "Method not allowed"}
-        response = make_response(jsonpickle.encode(response_data, unpicklable=True, indent=4))
+        response = make_response(
+            jsonpickle.encode(response_data, unpicklable=True, indent=4)
+        )
         response.headers["Content-Type"] = "application/json"
         response = add_cors_headers(response)
         return response, 405
 
 
-# DONE
 def main() -> None:
-    try:
-        servercert: Union[str, None] = os.environ["SERVERCERT"]
-        serverkey: Union[str, None] = os.environ["SERVERKEY"]
-    except KeyError:
-        servercert = None
-        serverkey = None
+    servercert: str | None = os.environ.get("SERVERCERT")
+    serverkey: str | None = os.environ.get("SERVERKEY")
+
+    host = os.environ.get("COLETRA_API_HOST", "localhost")
+    port = int(os.environ.get("COLETRA_API_PORT", 5000))
 
     if servercert is None or serverkey is None:
-        app.run(port=5003, host="slt.ufal.mff.cuni.cz")
+        app.run(port=port, host=host)
     else:
         app.run(
-            port=5003,
-            host="slt.ufal.mff.cuni.cz",
+            port=port,
+            host=host,
             ssl_context=(servercert, serverkey),
         )
 

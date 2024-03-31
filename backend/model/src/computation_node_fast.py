@@ -2,13 +2,15 @@
 import json
 import sys
 import time
+import os
 
 import numpy as np
-import requests  # type: ignore
+import requests
 import urllib3
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+API_URL = os.environ.get("COLETRA_API_URL")
 
 # Whisper backend
 class ASRBase:
@@ -20,7 +22,7 @@ class ASRBase:
         self.transcribe_kargs = {}
         self.original_language = lan
 
-        self.model = self.load_model(modelsize, cache_dir, model_dir) # type: ignore
+        self.model = self.load_model(modelsize, cache_dir, model_dir)
 
     def load_model(self, modelsize, cache_dir):
         raise NotImplementedError("must be implemented in the child class")
@@ -43,7 +45,7 @@ class FasterWhisperASR(ASRBase):
     sep = ""
 
     def load_model(self, modelsize=None, cache_dir=None, model_dir=None):
-        from faster_whisper import WhisperModel  # type: ignore
+        from faster_whisper import WhisperModel
 
         if model_dir is not None:
             model_size_or_path = model_dir
@@ -158,13 +160,13 @@ def main() -> None:
 
     while True:
         try:
-            r = requests.get("https://slt.ufal.mff.cuni.cz:5003/offload_ASR", verify=False)
+            r = requests.get(f"{API_URL}/offload_ASR", verify=False)
             json_data = json.loads(r.text)
             timestamp = json_data["timestamp"]
             audio = json_data["audio"]
 
             print("audio: ", len(audio), file=sys.stderr)
-            
+
             if len(audio) == 0:
                 print("No audio data")
                 time.sleep(5)
@@ -200,10 +202,11 @@ def main() -> None:
                 res = comp_node.transcribe(audio, init_prompt=prompt)
                 tsw = comp_node.ts_words(res)
                 ends = comp_node.segments_end_ts(res)
-                print("transcript: ", tsw, file=sys.stderr)
+
+                # print("transcript: ", tsw, file=sys.stderr)
 
                 r = requests.post(
-                    "https://slt.ufal.mff.cuni.cz:5003/offload_ASR",
+                    f"{API_URL}/offload_ASR",
                     json={
                         "session_id": session_id,
                         "timestamp": timestamp,

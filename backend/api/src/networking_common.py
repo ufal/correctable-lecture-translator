@@ -1,6 +1,6 @@
-from common import ASRConfig
-from text_handlers import CurrentASRTextContainer, Timespan
-from buffer_common import OnlineASRProcessor, create_tokenizer
+from .common import ASRConfig, Timespan
+from .text_handlers import CurrentASRTextContainer
+from .buffer_common import OnlineASRProcessor, create_tokenizer
 from typing import Dict, List, Union
 import json
 import time
@@ -51,7 +51,7 @@ class TranscribePacket:
         Returns data to offload to ASR services.
         If no data is ready to be offloaded, returns None.
         """
-        
+
         if self.transcript is None:
             if time.time() - self.sent_out_time > 15:
                 self.sent_out_time = time.time()
@@ -109,7 +109,7 @@ class TranslatePacket:
         Returns data to offload to ASR services.
         If no data is ready to be offloaded, returns None.
         """
-        
+
         if (not self.recieved) and (time.time() - self.sent_out_time > 15):
             self.sent_out_time = time.time()
             return {
@@ -126,8 +126,7 @@ class TranslatePacket:
 class Session:
     def __init__(self, session_id: str, config: ASRConfig) -> None:
         self.session_id: str = session_id
-        # DONE: Fix uselsess of these two after initialization
-        self.source_language: str = "cs"  # default audio language
+        self.source_language: str = "en"  # default audio language
         self.transcript_language: str = "en"  # default transcript language
         self.supported_languages: List[str] = config.supported_languages
 
@@ -135,7 +134,6 @@ class Session:
         self.texts: CurrentASRTextContainer = CurrentASRTextContainer(
             self.save_path + "/text_chunks", config.supported_languages
         )
-        # DONE: Check functionality of OnlineASRProcessor
         self.online_asr_processor: OnlineASRProcessor = OnlineASRProcessor(
             create_tokenizer(self.transcript_language)
         )
@@ -150,7 +148,6 @@ class Session:
     def switch_source_language(self, language: str):
         self.source_language = language
 
-    # DONE
     def end_session(self):
         for text in self.texts.current_texts.values():
             with open(
@@ -163,7 +160,6 @@ class Session:
             ) as file:
                 print(text.to_json(), file=file)
 
-    # DONE
     def get_save_folder(self, supported_languages: List[str]):
         if not os.path.isdir("recordings"):
             os.mkdir("recordings")
@@ -196,7 +192,6 @@ class Session:
             os.mkdir(recordings_folder + "/final_transcripts/" + language)
         return recordings_folder
 
-    # DONE
     def save_audio_chunk(self, chunk: Dict[str, float], timestamp: int):
         with open(
             self.save_path + "/audio/" + str(timestamp) + "_" + str(time.time()) + ".json",

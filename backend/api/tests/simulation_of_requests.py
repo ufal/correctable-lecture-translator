@@ -1,9 +1,11 @@
 import os
 import json
-import requests # type: ignore
+import requests
 import time
 
 # I want to simulate sending one request evert second to localhost:5000
+
+API_URL = os.environ.get("COLETRA_API_URL")
 
 
 def list_dir_sorted(path):
@@ -47,7 +49,7 @@ stable = ""
 unstable = ""
 
 for chunk in recordings.data:
-    r = requests.post("http://slt.ufal.mff.cuni.cz:5003/submit_audio_chunk", json=chunk)
+    r = requests.post(f"{API_URL}/submit_audio_chunk", json=chunk)
     # print(r.text)
     # r.text is a json which I want to decode
     decoded = json.loads(r.text)

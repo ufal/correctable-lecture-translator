@@ -49,6 +49,7 @@ export default {
 				.connect(this.context.destination);
 		},
 		async submitAudioChunk(audioEvent: { data: Float32Array }) {
+			
 			const res = await this.asrClient.submitAudioChunk({
 				timestamp: this.timestamp++,
 				chunk: audioEvent.data,

@@ -1,24 +1,26 @@
 <template lang="pug">
-protected(v-if="!auth.loggedIn", :auth="auth")
-.container(v-else)
-	session-list(:client="client", :activeSessions="activeSessions" @update-sessions="getSessions")
+//- Uncomment if you want to have simple login auth enabled
+//- protected(v-if="!auth.loggedIn", :auth="auth")
+//- .container(v-else)
+session-list(:client="client", :activeSessions="activeSessions" @update-sessions="getSessions")
 
-	v-text-field.idInput(
-		label="Current session id",
-		v-model="sessionName",
-		@click:append-inner="createSession",
-		append-inner-icon="mdi-check",
-		variant="solo",
-	)
+v-text-field.idInput(
+	label="Current session id",
+	v-model="sessionName",
+	@click:append-inner="createSession",
+	append-inner-icon="mdi-check",
+	variant="solo",
+)
 
-	audio-recorder(:asrClient="client", :sampleRate="sampleRate")
+audio-recorder(:asrClient="client", :sampleRate="sampleRate")
 </template>
 
 <script lang="ts">
+// Uncomment if you want to have simple login auth enabled
 import Protected from "@/components/Protected.vue";
-import AsrClient from "@/utils/client";
 import AudioRecorder from "@/components/AudioRecorder.vue";
 import SessionList from "@/components/SessionList.vue";
+import AsrClient from "@/utils/client";
 import "@/styles/recording.scss";
 
 export default {

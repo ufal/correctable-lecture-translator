@@ -11,6 +11,7 @@ async function main() {
 
 	source.connect(recorder).connect(context.destination);
 
+	// TODO: remove ethis code as it is unused?
 	recorder.port.onmessage = (e: { data: Float32Array }) => {
 		fetch("http://slt.ufal.cuni.cz:5003/submit_audio_chunk", {
 			method: "POST", // *GET, POST, PUT, DELETE, etc.

@@ -1,6 +1,6 @@
 import jsonpickle  # type: ignore
 from typing import Dict, List, Tuple, Union
-from common import format_timestamp, Timespan
+from .common import format_timestamp, Timespan
 import time
 import re
 
