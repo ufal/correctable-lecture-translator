@@ -5,7 +5,7 @@ import os
 # create random session_id
 import random
 import string
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 
 import jsonpickle
 
@@ -40,7 +40,8 @@ def add_cors_headers(response: Response):
     return response
 
 
-def session_not_found(session_id: str | None = None):
+def session_not_found(session_id: Union[str, None]
+ = None):
     response_data = {
         "success": False,
         "session_id": session_id,
@@ -258,7 +259,7 @@ def get_latest_text_chunks():
         json: A JSON response with the following fields:
         - success (`bool`): Whether the request was successful.
         - session_id (`str`): The session ID of the session.
-        - text_chunks (`list[Dict[str, int | str]]`): A list of text chunks with newer versions. Each text chunk is a dictionary with the following fields:
+        - text_chunks (`list[Dict[str, Union[int. str]]]`): A list of text chunks with newer versions. Each text chunk is a dictionary with the following fields:
             - timestamp (`int`): The timestamp of the text chunk.
             - version (`int`): The version of the text chunk.
             - text (`str`): The text of the text chunk.
@@ -983,8 +984,10 @@ def offload_translation():
 
 
 def main() -> None:
-    servercert: str | None = os.environ.get("SERVERCERT")
-    serverkey: str | None = os.environ.get("SERVERKEY")
+    servercert: Union[str, None]
+ = os.environ.get("SERVERCERT")
+    serverkey: Union[str, None]
+ = os.environ.get("SERVERKEY")
 
     host = os.environ.get("COLETRA_API_HOST", "localhost")
     port = int(os.environ.get("COLETRA_API_PORT", 5000))
