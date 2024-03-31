@@ -1,0 +1,23 @@
+@import "theme";
+
+$textEditorHeight: 65rem;
+
+.textEditorContainer {
+    display: flex;
+    flex-wrap: wrap;
+	max-height: $textEditorHeight;
+	background: $surface;
+	padding: 1.5rem;
+    padding-bottom: 2.5rem;
+	border-radius: 0.75rem;
+	margin-top: 70px;
+	margin-bottom: 1rem;
+}
+
+.textEditor {
+    display: inline;
+	overflow-y: scroll;
+	background: $surface;
+	border-radius: 0.75rem;
+    max-height: calc($textEditorHeight - 8rem);
+}

@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <v-app>
     <default-bar />
 
@@ -9,4 +9,4 @@
 <script lang="ts" setup>
   import DefaultBar from './AppBar.vue'
   import DefaultView from './View.vue'
-</script>
+</script> -->

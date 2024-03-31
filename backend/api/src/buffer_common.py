@@ -1,127 +1,45 @@
-#!/usr/bin/env python3
-import sys
+# from typing import List
 import numpy as np
-import librosa
-from functools import lru_cache
-import time
-import requests
-import json
+import tokenize_uk
+from mosestokenizer import MosesTokenizer
+from typing import List, Tuple
 
+# # DONE?: rework this according to computation_node_fast
+# class AudioBuffer:
+#     def __init__(self, SNIPPET_SIZE: int, SHIFT_LENGTH: int):
+#         # config
+#         self.SNIPPET_SIZE = SNIPPET_SIZE
+#         self.SHIFT_LENGTH = SHIFT_LENGTH
 
-@lru_cache
-def load_audio(fname):
-    a, _ = librosa.load(fname, sr=16000)
-    return a
+#         # data
+#         self.buffer: List[bytes] = []
+#         self.smallest_available_timestamp = 0
 
+#     def extend(self, chunk):
+#         self.buffer.extend(chunk)
 
-def load_audio_chunk(fname, beg, end):
-    audio = load_audio(fname)
-    beg_s = int(beg * 16000)
-    end_s = int(end * 16000)
-    return audio[beg_s:end_s]
+#     def get_snippet(self, timestamp: int) -> List[bytes]:
+#         actuall_timestamp = timestamp - self.smallest_available_timestamp
+#         return self.buffer[
+#             actuall_timestamp * self.SHIFT_LENGTH : actuall_timestamp * self.SHIFT_LENGTH
+#             + self.SNIPPET_SIZE
+#         ]
 
+#     def can_get_snippet(self, timestamp: int):
+#         actuall_timestamp = timestamp - self.smallest_available_timestamp
+#         return actuall_timestamp * self.SHIFT_LENGTH + self.SNIPPET_SIZE <= len(self.buffer)
 
-# Whisper backend
-class ASRBase:
-    # join transcribe words with this character (" " for whisper_timestamped, "" for faster-whisper because it emits the spaces when neeeded)
-    sep = " "
+#     def shift(self):
+#         if len(self.buffer) > self.SNIPPET_SIZE:
+#             self.smallest_available_timestamp += 1
+#             self.buffer = self.buffer[self.SHIFT_LENGTH :]
 
-    def __init__(self, lan, modelsize=None, cache_dir=None, model_dir=None):
-        self.transcribe_kargs = {}
-        self.original_language = lan
+#     def clear(self):
+#         self.buffer = []
+#         self.smallest_available_timestamp = 0
 
-        self.model = self.load_model(modelsize, cache_dir, model_dir)
-
-    def load_model(self, modelsize, cache_dir):
-        raise NotImplementedError("must be implemented in the child class")
-
-    def transcribe(self, audio, init_prompt=""):
-        raise NotImplementedError("must be implemented in the child class")
-
-    def use_vad(self):
-        raise NotImplementedError("must be implemented in the child class")
-
-
-class FasterWhisperASR(ASRBase):
-    """Uses faster-whisper library as the backend. Works much faster, appx 4-times (in offline mode). For GPU, it requires installation with a specific CUDNN version.
-
-    Requires imports, if used:
-        import faster_whisper
-    """
-
-    sep = ""
-
-    def load_model(self, modelsize=None, cache_dir=None, model_dir=None):
-        from faster_whisper import WhisperModel
-
-        if model_dir is not None:
-            model_size_or_path = model_dir
-        elif modelsize is not None:
-            model_size_or_path = modelsize
-        else:
-            raise ValueError("modelsize or model_dir parameter must be set")
-
-        # this worked fast and reliably on NVIDIA L40
-        model = WhisperModel(
-            model_size_or_path, device="cuda", compute_type="float16", download_root=cache_dir
-        )
-
-        # or run on GPU with INT8
-        # tested: the transcripts were different, probably worse than with FP16, and it was slightly (appx 20%) slower
-        # model = WhisperModel(model_size, device="cuda", compute_type="int8_float16")
-
-        # or run on CPU with INT8
-        # tested: works, but slow, appx 10-times than cuda FP16
-        #        model = WhisperModel(modelsize, device="cpu", compute_type="int8") #, download_root="faster-disk-cache-dir/")
-        return model
-
-    def transcribe(self, audio, init_prompt=""):
-        # tested: beam_size=5 is faster and better than 1 (on one 200 second document from En ESIC, min chunk 0.01)
-        segments, info = self.model.transcribe(
-            audio,
-            language=self.original_language,
-            initial_prompt=init_prompt,
-            beam_size=5,
-            word_timestamps=True,
-            condition_on_previous_text=True,
-            **self.transcribe_kargs,
-        )
-        return list(segments)
-
-    def ts_words(self, segments):
-        o = []
-        for segment in segments:
-            for word in segment.words:
-                # not stripping the spaces -- should not be merged with them!
-                w = word.word
-                t = (word.start, word.end, w)
-                o.append(t)
-        return o
-
-    def segments_end_ts(self, res):
-        return [s.end for s in res]
-
-    def use_vad(self):
-        self.transcribe_kargs["vad_filter"] = True
-
-    def set_translate_task(self):
-        self.transcribe_kargs["task"] = "translate"
-
-
-class ComputationNode:
-    sep = ""
-
-    def __init__(self, asr_model):
-        self.asr_model = asr_model
-
-    def transcribe(self, audio, init_prompt=""):
-        return self.asr_model.transcribe(audio, init_prompt=init_prompt)
-
-    def ts_words(self, segments):
-        return self.asr_model.ts_words(segments)
-
-    def segments_end_ts(self, res):
-        return self.asr_model.segments_end_ts(res)
+#     def __len__(self):
+#         return len(self.buffer)
 
 
 class HypothesisBuffer:
@@ -191,28 +109,31 @@ class HypothesisBuffer:
 class OnlineASRProcessor:
     SAMPLING_RATE = 16000
 
-    def __init__(self, asr, tokenizer):
+    def __init__(self, tokenizer):
         """asr: WhisperASR object
         tokenizer: sentence tokenizer object for the target language. Must have a method *split* that behaves like the one of MosesTokenizer.
         """
-        self.asr = asr
         self.tokenizer = tokenizer
-
+        # NOTE: when using something else than FasterWhisperASR, change the separator to the one used by the ASR
+        self.asr_sep = ""
         self.init()
 
-    def init(self):
+    def init(self) -> None:
         """run this when starting or restarting processing"""
         self.audio_buffer = np.array([], dtype=np.float32)
         self.buffer_time_offset = 0
 
         self.transcript_buffer = HypothesisBuffer()
-        self.commited = []
+        self.commited:List[Tuple[float, float, str]] = []
         self.last_chunked_at = 0
 
         self.silence_iters = 0
+        self.buffer_updated: bool= False
+        self.last_timestamp: int = 0
 
     def insert_audio_chunk(self, audio):
         self.audio_buffer = np.append(self.audio_buffer, audio)
+        self.buffer_updated = True
 
     def prompt(self):
         """Returns a tuple: (prompt, context), where "prompt" is a 200-character suffix of commited text that is inside of the scrolled away part of audio buffer.
@@ -231,21 +152,13 @@ class OnlineASRProcessor:
             llllll += len(x) + 1
             prompt.append(x)
         non_prompt = self.commited[k:]
-        return self.asr.sep.join(prompt[::-1]), self.asr.sep.join(t for _, _, t in non_prompt)
+        return self.asr_sep.join(prompt[::-1]), self.asr_sep.join(t for _, _, t in non_prompt)
 
-    def process_iter(self):
+    def process_iter(self, tsw, ends):
         """Runs on the current audio buffer.
         Returns: a tuple (beg_timestamp, end_timestamp, "text"), or (None, None, "").
         The non-emty text is confirmed (commited) partial transcript.
         """
-
-        prompt, non_prompt = self.prompt()
-        res = self.asr.transcribe(self.audio_buffer, init_prompt=prompt)
-        # print("RES:", res, file=sys.stdout, flush=True)
-
-        # transform to [(beg,end,"word1"), ...]
-        tsw = self.asr.ts_words(res)
-
         self.transcript_buffer.insert(tsw, self.buffer_time_offset)
         o = self.transcript_buffer.flush()
         self.commited.extend(o)
@@ -257,7 +170,7 @@ class OnlineASRProcessor:
         # if the audio buffer is longer than 30s, trim it...
         if len(self.audio_buffer) / self.SAMPLING_RATE > 30:
             # ...on the last completed segment (labeled by Whisper)
-            self.chunk_completed_segment(res)
+            self.chunk_completed_segment(ends)
 
         return self.to_flush(o)
 
@@ -274,11 +187,9 @@ class OnlineASRProcessor:
 
         self.chunk_at(chunk_at)
 
-    def chunk_completed_segment(self, res):
+    def chunk_completed_segment(self, ends):
         if self.commited == []:
             return
-
-        ends = self.asr.segments_end_ts(res)
 
         t = self.commited[-1][1]
 
@@ -341,7 +252,7 @@ class OnlineASRProcessor:
         # sents: [(beg1, end1, "sentence1"), ...] or [] if empty
         # return: (beg1,end-of-last-sentence,"concatenation of sentences") or (None, None, "") if empty
         if sep is None:
-            sep = self.asr.sep
+            sep = self.asr_sep
         t = sep.join(s[2] for s in sents)
         if len(sents) == 0:
             b = None
@@ -365,7 +276,6 @@ def create_tokenizer(lan):
     ), "language must be Whisper's supported lang code: " + " ".join(WHISPER_LANG_CODES)
 
     if lan == "uk":
-        import tokenize_uk
 
         class UkrainianTokenizer:
             def split(self, text):
@@ -378,104 +288,6 @@ def create_tokenizer(lan):
         lan
         in "as bn ca cs de el en es et fi fr ga gu hi hu is it kn lt lv ml mni mr nl or pa pl pt ro ru sk sl sv ta te yue zh".split()
     ):
-        from mosestokenizer import MosesTokenizer
-
         return MosesTokenizer(lan)
 
     raise ValueError("language not supported by Current Tokenizers: " + lan)
-
-
-class ASRConfig:
-    def __init__(self):
-        self.min_chunk_size = 1.0  # Minimum audio chunk size in seconds. It waits up to this time to do processing. If the processing takes shorter time, it waits, otherwise it processes the whole segment that was received by this time.
-        self.model = "large-v2"  # Name size of the Whisper model to use (default: large-v2). The model is automatically downloaded from the model hub if not present in model cache dir.
-        # tiny.en,tiny,base.en,base,small.en,small,medium.en,medium,large-v1,large-v2,large
-        self.language = "en"  # Language code for transcription, e.g. en,de,cs.
-        self.task = "transcribe"  # "transcribe" or "translate"
-        self.start_at = 0.0  # Start processing audio at this time.
-        self.backend = "faster-whisper"  # Load only this backend for Whisper processing.
-        self.vad = False  # Use VAD = voice activity detection, with the default parameters.
-        self.SAMPLING_RATE = 16000
-        self.model_cache_dir = None
-        self.model_dir = None
-
-
-if __name__ == "__main__":
-    config = ASRConfig()
-
-    size = config.model
-    language = config.language
-
-    if config.backend == "faster-whisper":
-        asr_cls = FasterWhisperASR
-
-    asr = asr_cls(
-        modelsize=size, lan=language, cache_dir=config.model_cache_dir, model_dir=config.model_dir
-    )
-
-    if config.task == "translate":
-        asr.set_translate_task()
-        tgt_language = "en"  # Whisper translates into English
-    else:
-        tgt_language = language  # Whisper transcribes in this language
-
-    if config.vad:
-        asr.use_vad()
-
-    min_chunk = config.min_chunk_size
-    comp_node = ComputationNode(asr)
-    online_asr = OnlineASRProcessor(comp_node, create_tokenizer(tgt_language))
-
-    while True:
-        try:
-            r = requests.get("http://slt.ufal.mff.cuni.cz:5003/offload_ASR", verify=False)
-            json_data = json.loads(r.text)
-            timestamp = json_data["timestamp"]
-            audio = json_data["audio"]
-
-            if len(audio) == 0:
-                print("No audio data")
-                time.sleep(5)
-                continue
-
-            session_id = json_data["session_id"]
-            source_language = json_data["source_language"]
-            transcript_language = json_data["transcript_language"]
-
-            if isinstance(audio[0], int):
-                audio = np.array(audio, dtype=np.float32) / 32768.0
-            audio = np.array(audio, dtype=np.float32)
-
-            config.language = source_language
-            # starting_ASR_time = time.time()
-            if source_language == transcript_language:
-                config.task = "transcribe"
-            else:
-                config.task = "translate"
-
-            online_asr.insert_audio_chunk(audio)
-
-            try:
-                o1 = online_asr.process_iter()
-            except AssertionError:
-                print("assertion error", file=sys.stderr)
-                pass
-            else:
-                if o1[0] is not None:
-                    result = o1[2]
-                    # print(result)
-
-                    r = requests.post(
-                        "http://slt.ufal.mff.cuni.cz:5003/offload_ASR",
-                        json={
-                            "session_id": session_id,
-                            "timestamp": timestamp,
-                            "ASR_result": result,
-                        },
-                        verify=False,
-                    )
-
-            # print("ASR time: ", time.time() - starting_ASR_time, file=sys.stderr)
-        except Exception as e:
-            print("cannot connect to server " + str(e), file=sys.stderr)
-            time.sleep(5)

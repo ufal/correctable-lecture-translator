@@ -1,13 +1,16 @@
 <template lang="pug">
-v-container
-	edit-text-chunk(
-		v-for="chunk in textChunks",
-		:client="client",
-		:chunk="chunk"
-	)
+v-container.textEditorContainer
+	.subTitle Text Editor
+	v-container.textEditor
+		edit-text-chunk(
+			v-for="chunk in textChunks",
+			:client="client",
+			:chunk="chunk"
+		)
 </template>
 
 <script lang="ts">
+import "@/styles/textEditor.scss";
 import { TextChunk } from "@/utils/chunk";
 import AsrClient from "@/utils/client";
 import { PropType } from "vue";

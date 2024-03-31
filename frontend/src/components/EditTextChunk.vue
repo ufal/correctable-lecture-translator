@@ -1,30 +1,39 @@
 <template lang="pug">
-v-card.container
-	.editTextChunk(
-		contenteditable="true",
-		@input="onInput",
-		@focus="highlightFocused",
-		@blur="unhighlightFocused",
-		v-html="originalText"
-	)
-	v-btn.submitChanges(
-		v-if="showSubmit",
-		size="small",
-		color="#188B61",
-		@click="submitTextChunk"
-	) Submit
-	v-btn.discardChanges(
-		v-if="showSubmit",
-		size="small",
-		color="#bd3f4f",
-		@click="discardChanges"
-	) Discard
+.container
+	.textFeedback
+		.editTextChunk(
+			contenteditable="true",
+			@input="onInput",
+			@focus="highlightFocused",
+			@blur="unhighlightFocused",
+			v-html="originalText"
+		)
+		.feedback
+			v-btn.like(
+				size="small",
+				:icon="likeIcon",
+				@click="likeTextChunk"
+			)
+			v-btn.dislike(
+				size="small",
+				:icon="dislikeIcon",
+				@click="dislikeTextChunk"
+			)
+	.actions(v-if="showSubmit")
+		v-btn.submitChanges(
+			size="small",
+			@click="submitTextChunk"
+		) Submit
+		v-btn.discardChanges(
+			size="small",
+			@click="discardChanges"
+		) Discard
 </template>
 
 <script lang="ts">
 import { TextChunk } from "@/utils/chunk";
 import type { PropType } from "vue";
-import "@/styles/editChunk.scss";
+import "@/styles/editTextChunk.scss";
 import AsrClient from "@/utils/client";
 
 export default {
@@ -44,8 +53,9 @@ export default {
 			originalText: "" as string,
 			updatedText: "" as string,
 			showSubmit: false,
-			highlightSpan:
-				"<span style='background-color: #E0D64E; color: black'>",
+			highlightSpan: "<span style='background-color: #cfdedd; color: black'>",
+			likeIcon: "mdi-thumb-up-outline",
+			dislikeIcon: "mdi-thumb-down-outline",
 		};
 	},
 	methods: {
@@ -57,28 +67,62 @@ export default {
 					text: this.updatedText,
 				} as TextChunk);
 				this.showSubmit = false;
+				this.chunk.locked = false;
 			}
 		},
 		onInput(e: any) {
 			this.updatedText = e.target.innerHTML;
-
-			if (this.updatedText != this.originalText) this.showSubmit = true;
-			else this.showSubmit = false;
+			if (this.updatedText.trim() != this.originalText.trim()) {
+				this.showSubmit = true;
+				this.chunk.locked = true;
+			} else {
+				this.showSubmit = false;
+				this.chunk.locked = false;
+			}
 		},
 		highlightFocused(e: any) {
 			this.chunk.text = this.highlightSpan + this.chunk.text + "</span>";
 		},
 		unhighlightFocused(e: any) {
-			this.chunk.text = this.chunk.text
-				.replace(this.highlightSpan, "")
-				.replace("</span>", "");
+			this.chunk.text = this.chunk.text.replace(this.highlightSpan, "").replace("</span>", "");
 		},
 		discardChanges() {
 			this.updatedText = this.originalText;
-			// Ugly hack to update displayed variable
-			// the space is discarded during html render
+			// Ugly hack to update displayed variable.
+			// The "space" is discarded during the render.
 			this.originalText = this.originalText + " ";
 			this.showSubmit = false;
+			this.chunk.locked = false;
+		},
+		likeTextChunk() {
+			var rating = 0;
+			if (this.likeIcon == "mdi-thumb-up-outline") {
+				this.likeIcon = "mdi-thumb-up";
+				if (this.dislikeIcon == "mdi-thumb-down") {
+					this.dislikeIcon = "mdi-thumb-down-outline";
+					rating++;
+				}
+				rating++;
+			} else {
+				this.likeIcon = "mdi-thumb-up-outline";
+				rating--;
+			}
+			this.client.rateTextChunk(this.chunk, rating);
+		},
+		dislikeTextChunk() {
+			var rating = 0;
+			if (this.dislikeIcon == "mdi-thumb-down-outline") {
+				this.dislikeIcon = "mdi-thumb-down";
+				if (this.likeIcon == "mdi-thumb-up") {
+					this.likeIcon = "mdi-thumb-up-outline";
+					rating--;
+				}
+				rating--;
+			} else {
+				this.dislikeIcon = "mdi-thumb-down-outline";
+				rating++;
+			}
+			this.client.rateTextChunk(this.chunk, rating);
 		},
 	},
 

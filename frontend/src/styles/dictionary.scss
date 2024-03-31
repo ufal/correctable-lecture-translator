@@ -1,0 +1,210 @@
+@import "theme";
+
+.dict {
+	margin-top: 1rem;
+	border-radius: 0.75rem;
+	padding: 1.5rem;
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+}
+
+.entry {
+	width: 100%;
+	display: flex;
+	flex-wrap: wrap;
+	background: $overlay-low;
+	border-radius: 0.75rem;
+	padding: 1rem;
+	margin: 1rem;
+}
+
+.dictEntryActions > * {
+	margin: 0;
+}
+
+.divider {
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
+	margin: 0.75rem;
+}
+
+.moveEntry {
+	background: none;
+	margin: auto;
+	height: 1.75rem !important;
+	color: $green !important;
+}
+
+.deleteEntry {
+	background: none;
+	margin: auto;
+	height: 1.75rem !important;
+	color: $green !important;
+}
+
+.invisible {
+	visibility: hidden;
+}
+
+.arrow {
+	display: flex;
+	justify-content: center;
+	height: 1rem;
+}
+
+.words {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	padding: 0;
+	font-family: "Roboto Slab", serif;
+	font-weight: 400;
+	flex: 1;
+}
+
+.wordFrom {
+	color: $black;
+	display: flex;
+	text-align: center;
+	border-radius: 0.75rem;
+	margin: 0.5rem 1rem 0.5rem 0rem;
+	background: rgba($purple, 0.15);
+	padding: 0;
+	white-space: break-spaces;
+}
+
+.wordFrom.disable {
+	background: rgba($iris-low, 0.75);
+}
+
+.wordFrom.disable > span {
+	opacity: 0.5;
+}
+
+.wordTo {
+	color: $black;
+	width: 100%;
+	margin: auto;
+	background: $overlay-low;
+	border-radius: 0.75rem;
+	background: rgba($green, 0.15);
+	word-break: break-all;
+	text-wrap: balance;
+	white-space: break-spaces;
+	padding: 0.25rem;
+	z-index: 999;
+}
+
+.word {
+	&:focus {
+		outline: none;
+	}
+	position: relative;
+	margin: auto;
+	text-align: center;
+	text-wrap: balance;
+	word-break: break-word;
+	padding-top: 0.5rem;
+	padding-bottom: 0.5rem;
+}
+
+.wordActions {
+	margin: auto;
+	margin-right: 0;
+	margin-left: 0.15rem;
+}
+
+.wordAction {
+	background: none;
+}
+
+.wordAction.disable {
+	color: $dark-purple;
+}
+
+.wordAction.delete {
+	color: $dark-purple;
+}
+
+.dictEntryActions {
+	flex: 100%;
+	margin-top: 0.5rem;
+	animation: ease-in 1s linear;
+}
+
+@keyframes FadeIn {
+	0% {
+		opacity: 0;
+		transform: scale(0.1);
+	}
+
+	85% {
+		opacity: 1;
+		transform: scale(1.05);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+
+.dictEntryActions > * {
+	animation: FadeIn 0.2s linear;
+	animation-fill-mode: both;
+}
+
+.newEntry {
+	margin: auto;
+	width: 100%;
+	background: none;
+	opacity: 0.35;
+	font-size: 1.5rem;
+}
+
+.words > .newEntry {
+	color: $purple !important;
+}
+
+.dict > .newEntry {
+	color: $green !important;
+}
+
+.moveWordContainer {
+	place-content: flex-end;
+	display: flex;
+	flex-wrap: wrap;
+	margin: auto;
+	margin-left: 0;
+	margin-right: 0.15rem;
+	width: 4rem;
+}
+
+.moveWord {
+	background: none;
+	font-size: 1rem;
+	color: $purple !important;
+}
+
+.moveEntryContainer {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	width: 1.75rem;
+	margin-left: 0.15rem;
+}
+
+@media screen and (max-width: 600px) {
+	.entry {
+		width: 90vw;
+	}
+
+	.dictEntryActions {
+		top: 6%;
+		right: 4%;
+	}
+
+	.dict {
+		font-size: 0.75rem;
+	}
+}

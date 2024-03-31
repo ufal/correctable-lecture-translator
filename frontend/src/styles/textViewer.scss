@@ -1,46 +1,28 @@
+@import "theme";
+
+$textViewerHeight: 88vh;
+
+.textViewer {
+	max-height: $textViewerHeight;
+	background: $surface;
+	padding: 1.5rem;
+	border-radius: 0.75rem;
+}
+
 .translation {
-    margin-top: 25px;
-	padding: 10px;
-    font-family: Arial, Helvetica, sans-serif;
-    color: #262626;
-    line-height: 1.2;
-    overflow-y: scroll;
-    max-height: 92vh;
-    text-align: justify;
-}
-
-.editing {
-    overflow-y: scroll;
-    max-height: 92vh;
-}
-
-.viewing {
-    margin: 100px;
-    max-height: 100%;
-}
-
-.toggleEditor {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-}
-
-.toggleUpdates {
-    position: fixed;
-    top: 58px;
-    left: 10px;
-}
-
-.selectSession {
-    position: fixed;
-    top: 10px;
-    width: 176px;
-    left: 10px;
+	overflow-y: auto;
+	max-height: calc($textViewerHeight - 8vh) !important;
+	color: $black !important;
+	padding: 1rem;
+	font-family: 'Roboto Slab', serif;
+	font-weight: 400;
 }
 
 @media screen and (max-width: 600px) {
-    .translation {
-        margin: 90px 10px 10px 10px;
-        font-size: 24px !important;
-    }
+	.textViewer {
+		padding: 0.5rem;
+	}
+	.translation {
+		font-size: 1rem;
+	}
 }

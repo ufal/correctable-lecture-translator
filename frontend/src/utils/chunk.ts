@@ -11,6 +11,7 @@ export interface TextChunk {
 	timestamp: TimeStamp;
 	version: Version;
 	text: string;
+	locked: boolean;
 }
 
 export interface TextChunksUpdate {

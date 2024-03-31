@@ -11,7 +11,7 @@
 **/yarn-debug.log*
 **/yarn-error.log*
 **/pnpm-debug.log*
-**/.history-speechtransedit
+.history-*
 
 # Editor directories and files
 **/.idea
@@ -23,8 +23,15 @@
 **/*.sw?
 
 **/recordings/*
-**/.nohup.out
-backend/api/__pycache__/
-
+nohup.out
+**__pycache__/
 
 *.pem
+**.venv/
+*aaaaa.wav
+
+diarization/
+data/
+
+.env
+api_test.ipynb
