@@ -4,7 +4,7 @@ A system for live lecture translation (speech to text) where the audience can ea
 ## Usage
 
 ### Recorder
-After succesfull setup, go to `API_URL/record` (the one given to the frontend container), write new unique session name and click the plus button. This will create a new recording session. Then press the "microphone" button to start sending audio from your system's primary microphone (audio input device). You can pause and then resume the recording by clicking the "pause" button and again the "microphone" button.
+After succesfull setup (more in "readmes" contained in the `backdnd` and the `frontend` directories), go to `API_URL/record` (the one given to the frontend container), write new unique session name and click the plus button. This will create a new recording session. Then press the "microphone" button to start sending audio from your system's primary microphone (audio input device). You can pause and then resume the recording by clicking the "pause" button and again the "microphone" button.
 
 ### Viewer
 On the main page `API_URL/` (the one given to the frontend container) in the top right input field, put in the name of the session created at the `/recorder` endpoint and click the "play" button which will make.tour client start fetching the text (and correction rules) from the server. This can be paused by clicking on the "pause" button that should be visible in place of the "play" button while your client is actively getting and sending updates to the server.
