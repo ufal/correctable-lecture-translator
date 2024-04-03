@@ -984,10 +984,8 @@ def offload_translation():
 
 
 def main() -> None:
-    servercert: Union[str, None]
- = os.environ.get("SERVERCERT")
-    serverkey: Union[str, None]
- = os.environ.get("SERVERKEY")
+    servercert: Union[str, None] = os.environ.get("SERVERCERT")
+    serverkey: Union[str, None] = os.environ.get("SERVERKEY")
 
     host = os.environ.get("COLETRA_API_HOST", "localhost")
     port = int(os.environ.get("COLETRA_API_PORT", 5000))
