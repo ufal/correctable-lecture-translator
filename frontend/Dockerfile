@@ -14,4 +14,5 @@ ENV API_URL=$API_URL
 RUN npm run build
 
 EXPOSE 3000
-ENTRYPOINT serve -s --cors --ssl-cert $SERVERCERT --ssl-key $SERVERKEY dist
+#ENTRYPOINT serve -s --cors --ssl-cert $SERVERCERT --ssl-key $SERVERKEY dist
+ENTRYPOINT serve -s --cors dist

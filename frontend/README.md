@@ -18,7 +18,7 @@ cert and key files should be passed as environment variables `SERVERCERT` and `S
 
 - Frontend folder contains two "Dockerfiles". One (`BaseDockerfile`) is for dependency installation
 and the other (`Dockerfile`) is for running the frontend. First the base image must be built:
-`docker build -t coletra-frontend-base -f BaseDockerfile .`. Then the main image can be built
+`docker build -t crt-fe-base -f BaseDockerfile .`. Then the main image can be built
 like so: `docker build --build-arg SERVERCERT=path/to/servercert --build-arg SERVERKEY=path/to/serverkey --build-arg API_URL=https://your.api.url.com:1234 -t coletra-frontend .`.
 
 - The frontend can then be run with `docker run -p 443:3000 --rm coletra-frontend`.
