@@ -9,14 +9,14 @@ authors = [
 packages = [{ include = "src", from = "." }]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "~3.8"
 Flask = "3.0.0"
 Flask-Cors = "4.0.0"
 jsonpickle = "3.0.2"
 soundfile = "0.12.1"
-mosestokenizer = "1.2.1"
 tokenize_uk = "0.2.0"
 numpy = "1.24.4"
+fast-mosestokenizer = "^0.0.8.2"
 
 [tool.poetry.scripts]
 api = "src.api:main"

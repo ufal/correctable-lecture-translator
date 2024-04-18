@@ -15,3 +15,5 @@ RUN npm run build
 
 EXPOSE 3000
 ENTRYPOINT serve -s --cors --ssl-cert $SERVERCERT --ssl-key $SERVERKEY dist
+# for http
+# ENTRYPOINT serve -s --cors dist
