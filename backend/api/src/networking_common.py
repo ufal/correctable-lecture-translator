@@ -58,6 +58,7 @@ class TranscribePacket:
                 return {
                     "session_id": self.session_id,
                     "timestamp": self.timestamp,
+                    # here are the languages for translation
                     "source_language": self.source_language,
                     "transcript_language": self.transcript_language,
                     "prompt": self.prompt,
