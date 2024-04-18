@@ -9,7 +9,7 @@ authors = [
 packages = [{ include = "src", from = "." }]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "~3.8"
 Flask = "3.0.0"
 Flask-Cors = "4.0.0"
 jsonpickle = "3.0.2"
